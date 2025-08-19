@@ -2,6 +2,22 @@
 
 > Bootstrapped with [django-startproject](https://github.com/jefftriplett/django-startproject)
 
+## Prequisites
+This project relies on [docker][docker], [uv]() and [just]() to properly work.
+
+Here's the suggestion installation process for `uv` and `just` if you don't have them already:
+
+```bash
+# Install uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install `just` via cargo
+cargo install just
+# OR via npm if you don't have cargo
+npm install -g just
+```
+
+
 
 ## Usage
 
@@ -33,7 +49,7 @@ $ just console
 # Run Tests
 $ just test
 
-# Lint the project / run pre-commit by hand
+# Lint the project
 $ just lint
 
 # Re-build PIP requirements
@@ -44,24 +60,15 @@ $ just lock
 
 ```shell
 $ just --list
-```
-<!-- [[[cog
-import subprocess
-import cog
 
-list = subprocess.run(['just', '--list'], stdout=subprocess.PIPE)
-cog.out(
-    f"```\n{list.stdout.decode('utf-8')}```"
-)
-]]] -->
-```
 Available recipes:
     bootstrap *ARGS           # Initialize project with dependencies and environment
     build *ARGS               # Build Docker containers with optional args
+    check *ARGS               # Check lint errors with ruff
     console                   # Open interactive bash console in utility container
     down *ARGS                # Stop and remove containers, networks
-    lint *ARGS                # Run pre-commit hooks on all files
-    lock *ARGS                # Compile requirements.in to requirements.txt
+    lint                      # Run ruff linter on all python code
+    lock                      # Compile exports dependencies from pyproject.toml into requirements.txt
     logs *ARGS                # Show logs from containers
     manage *ARGS              # Run Django management commands
     pg_dump file='db.dump'    # Dump database to file
@@ -73,6 +80,6 @@ Available recipes:
     tail                      # Show and follow logs
     test *ARGS                # Run pytest with arguments
     up *ARGS                  # Start containers
-    upgrade                   # Upgrade dependencies and lock
 ```
-<!-- [[[end]]] -->
+
+[docker]: https://www.docker.com/

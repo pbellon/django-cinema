@@ -68,8 +68,11 @@ unfixable = []
 
 [dependency-groups]
 dev = [
+    "model-bakery>=1.20.5",
     "pytest>=8.4.1",
     "pytest-cov>=6.2.1",
     "pytest-django>=4.11.1",
 ]
+
+[project.optional-dependencies]
 lint = ["ruff>=0.12.9"]

@@ -21,7 +21,7 @@ bootstrap *ARGS:
     fi
 
     if [ ! -f "requirements.txt" ]; then
-        uv pip compile --output-file requirements.txt requirements.in
+        uv export --format requirements-txt > requirements.txt
         echo "requirements.txt created"
     fi
 
@@ -34,11 +34,6 @@ bootstrap *ARGS:
 # Build Docker containers with optional args
 @build *ARGS:
     docker compose build {{ ARGS }}
-
-# Generate README content with cogapp
-[private]
-@cog:
-    uv tool run --from cogapp cog -r README.md
 
 # Open interactive bash console in utility container
 @console:
@@ -56,9 +51,13 @@ bootstrap *ARGS:
 @fmt:
     just --fmt --unstable
 
-# Run pre-commit hooks on all files
-@lint *ARGS:
-    uv tool run --from pre-commit-uv pre-commit run {{ ARGS }} --all-files
+# Run ruff linter on all python code
+@lint:
+    uvx ruff format
+
+# Check lint errors with ruff
+@check *ARGS:
+    uvx ruff check {{ ARGS }}
 
 # Compile exports dependencies from pyproject.toml into requirements.txt
 @lock:
