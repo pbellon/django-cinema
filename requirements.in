@@ -1,0 +1,12 @@
+Django<6.0
+django-click
+environs[django]
+psycopg[binary]
+whitenoise
+
+django-test-plus
+model-bakery
+pre-commit
+pytest
+pytest-cov
+pytest-django
