@@ -22,6 +22,7 @@ class Spectator(User):
 
 # Create your models here.
 class Movie(models.Model):
+    title = models.TextField()
     author = models.ForeignKey(Author, related_name="movies", on_delete=models.DO_NOTHING)
 
 
