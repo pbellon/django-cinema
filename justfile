@@ -60,15 +60,16 @@ bootstrap *ARGS:
 @lint *ARGS:
     uv tool run --from pre-commit-uv pre-commit run {{ ARGS }} --all-files
 
-# Compile requirements.in to requirements.txt
-@lock *ARGS:
-    docker compose run \
-        --no-deps \
-        --rm \
-        utility \
-            bash -c "uv pip compile {{ ARGS }} \
-                --output-file requirements.txt \
-                requirements.in"
+# Compile exports dependencies from pyproject.toml into requirements.txt
+@lock:
+    uv export --format requirements-txt > requirements.txt
+    # docker compose run \
+    #     --no-deps \
+    #     --rm \
+    #     utility \
+    #         bash -c "uv pip compile {{ ARGS }} \
+    #             --output-file requirements.txt \
+    #             requirements.in"
 
 # Show logs from containers
 @logs *ARGS:
@@ -140,6 +141,3 @@ bootstrap *ARGS:
 @up *ARGS:
     docker compose up {{ ARGS }}
 
-# Upgrade dependencies and lock
-@upgrade:
-    just lock --upgrade
