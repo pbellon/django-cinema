@@ -2,65 +2,8 @@
 
 > Bootstrapped with [django-startproject](https://github.com/jefftriplett/django-startproject)
 
-<h1 align="center">Welcome to django-startproject 👋</h1>
-<p>
-  <a href="https://github.com/jefftriplett/django-startproject/actions" target="_blank">
-    <img alt="CI" src="https://github.com/jefftriplett/django-startproject/workflows/CI/badge.svg" />
-  </a>
-</p>
 
-> Django startproject template with batteries
-
-## :triangular_flag_on_post: Core Features
-
-- Django 5.2
-- Python 3.13
-- Docker Compose (I prefer Orbstack)
-- Justfile recipes
-- Postgres auto updates
-- uv support
-- pre-commit support
-
-## :triangular_flag_on_post: Django Features
-
-- django-click
-- environs[django]
-- psycopg[binary]
-- whitenoise
-
-## :shirt: Linting/auto-formatting
-
-- djade
-- django-upgrade
-- djhtml
-- pre-commit
-- pyupgrade
-- ruff
-
-### :green_heart: CI
-
-- django-test-plus
-- model-bakery
-- pytest
-- pytest-cov
-- pytest-django
-
-### 🏠 [Homepage](https://github.com/jefftriplett/django-startproject)
-
-## :wrench: Install
-
-```shell
-$ uv run --with=django django-admin startproject \
-    --extension=ini,py,toml,yaml,yml \
-    --template=https://github.com/jefftriplett/django-startproject/archive/main.zip \
-    example_project
-
-$ cd example_project
-
-$ just bootstrap
-```
-
-## :rocket: Usage
+## Usage
 
 ```shell
 # Bootstrap our project
@@ -133,30 +76,3 @@ Available recipes:
     upgrade                   # Upgrade dependencies and lock
 ```
 <!-- [[[end]]] -->
-
-## Author
-
-👤 **Jeff Triplett**
-
-* Website: https://jefftriplett.com
-* Micro Blog: https://micro.webology.dev
-* Mastodon: [@webology@mastodon.social](https://mastodon.social/@webology)
-* Xwitter: [@webology](https://twitter.com/webology)
-* GitHub: [@jefftriplett](https://github.com/jefftriplett)
-* Hire me: [revsys](https://www.revsys.com)
-
-## 🌟 Community Projects
-
-* [Django News Newsletter](https://django-news.com)
-* [Django News Jobs](https://jobs.django-news.com)
-* [Django Packages](https://djangopackages.org)
-* [DjangoCon US](https://djangocon.us)
-* [Awesome Django](https://awesomedjango.org)
-
-## 🤝 Contributing
-
-Contributions, issues and feature requests are welcome!<br />Feel free to check [issues page](https://github.com/jefftriplett/django-startproject/issues).
-
-## Show your support
-
-Give a ⭐️ if this project helped you!

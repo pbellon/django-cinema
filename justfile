@@ -63,13 +63,6 @@ bootstrap *ARGS:
 # Compile exports dependencies from pyproject.toml into requirements.txt
 @lock:
     uv export --format requirements-txt > requirements.txt
-    # docker compose run \
-    #     --no-deps \
-    #     --rm \
-    #     utility \
-    #         bash -c "uv pip compile {{ ARGS }} \
-    #             --output-file requirements.txt \
-    #             requirements.in"
 
 # Show logs from containers
 @logs *ARGS:

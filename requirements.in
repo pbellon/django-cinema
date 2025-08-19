@@ -1,9 +1,0 @@
-Django<6.0
-environs[django]
-psycopg[binary]
-whitenoise
-
-model-bakery
-pytest
-pytest-cov
-pytest-django
