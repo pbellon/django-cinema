@@ -5,7 +5,10 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "django-filter>=25.1",
     "django>=5.2.5",
+    "djangorestframework>=3.16.1",
+    "markdown>=3.8.2",
     "psycopg[binary]>=3.2.9",
     "whitenoise>=6.9.0",
 ]
@@ -62,3 +65,11 @@ per-file-ignores = {}
 # Enable Pyflakes `E` and `F` codes by default.
 select = ["E", "F"]
 unfixable = []
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+    "pytest-cov>=6.2.1",
+    "pytest-django>=4.11.1",
+]
+lint = ["ruff>=0.12.9"]
