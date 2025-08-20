@@ -19,7 +19,10 @@ class Command(BaseCommand):
             with transaction.atomic():
                 # create an author with a movie
                 nolan, _ = Author.objects.get_or_create(
-                    first_name="Christopher", last_name="Nolan", username="cnolan", password="notverysecurepassword"
+                    first_name="Christopher",
+                    last_name="Nolan",
+                    username="cnolan",
+                    password="notverysecurepassword",
                 )
 
                 self.stdout.write(f"Christopher Nollan created: {nolan}")
@@ -32,7 +35,10 @@ class Command(BaseCommand):
 
                 # another author with a movie
                 spielberg, _ = Author.objects.get_or_create(
-                    first_name="Steven", last_name="Spielberg", username="spielberg", password="newhollywood1970"
+                    first_name="Steven",
+                    last_name="Spielberg",
+                    username="spielberg",
+                    password="newhollywood1970",
                 )
                 third_encounter, _ = Movie.objects.get_or_create(
                     title="Close Encounters of the Third Kind",
@@ -65,27 +71,44 @@ class Command(BaseCommand):
                     password="janedoe1234",
                 )
                 # Add Interstallar to Jane's favorite movies
-                jane_fav_movie, _ = SpectatorFavoriteMovie.objects.get_or_create(spectator=janedoe, movie=interstellar)
-                jane_fav_author, _ = SpectatorFavoriteAuthor.objects.get_or_create(spectator=janedoe, author=nolan)
+                jane_fav_movie, _ = (
+                    SpectatorFavoriteMovie.objects.get_or_create(
+                        spectator=janedoe, movie=interstellar
+                    )
+                )
+                jane_fav_author, _ = (
+                    SpectatorFavoriteAuthor.objects.get_or_create(
+                        spectator=janedoe, author=nolan
+                    )
+                )
 
                 # Jane evaluation on interstellar with a comment
-                jane_interstellar_eval, _ = SpectatorMovieEvaluation.objects.get_or_create(
-                    spectator=janedoe,
-                    movie=interstellar,
-                    score=98,
-                    comment="My favorite movie of all time",
+                jane_interstellar_eval, _ = (
+                    SpectatorMovieEvaluation.objects.get_or_create(
+                        spectator=janedoe,
+                        movie=interstellar,
+                        score=98,
+                        comment="My favorite movie of all time",
+                    )
                 )
 
                 # Jane evaluation on nollan
-                jane_nolan_eval, _ = SpectatorAuthorEvaluation.objects.get_or_create(
-                    spectator=janedoe,
-                    author=nolan,
-                    score=90,
-                    comment="I love his movies, huge fan of the batman trilogy",
+                jane_nolan_eval, _ = (
+                    SpectatorAuthorEvaluation.objects.get_or_create(
+                        spectator=janedoe,
+                        author=nolan,
+                        score=90,
+                        comment="I love his movies, huge fan of the batman trilogy",
+                    )
                 )
 
-                jane_third_encounter_eval, _ = SpectatorMovieEvaluation.objects.get_or_create(
-                    spectator=janedoe, movie=third_encounter, score=20, comment="Not a fan at all..."
+                jane_third_encounter_eval, _ = (
+                    SpectatorMovieEvaluation.objects.get_or_create(
+                        spectator=janedoe,
+                        movie=third_encounter,
+                        score=20,
+                        comment="Not a fan at all...",
+                    )
                 )
 
                 self.stdout.write(self.style.SUCCESS("Seed data created"))

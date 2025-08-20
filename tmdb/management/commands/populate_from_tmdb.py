@@ -21,7 +21,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **opts):
         tmdb_client = client.TMDBClient()
-        all_movie_titles = list(Movie.objects.filter(tmdb_population_date__isnull=True).values_list("title", flat=True))
+        all_movie_titles = list(
+            Movie.objects.filter(tmdb_population_date__isnull=True).values_list(
+                "title", flat=True
+            )
+        )
         all_author_names = list(
             Author.objects.filter(tmdb_population_date__isnull=True)
             .only("first_name", "last_name")

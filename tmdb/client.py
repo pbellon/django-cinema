@@ -1,9 +1,11 @@
-from typing import List, Optional, Generator, Tuple
 from dataclasses import dataclass
-from django.conf import settings
 from datetime import date, datetime
+from typing import Generator, List, Optional, Tuple
 
 import requests
+from django.conf import settings
+from django.core.management.base import OutputWrapper
+from django.core.management.color import Style
 
 
 @dataclass
@@ -32,26 +34,42 @@ def parse_date(date_str: str) -> date:
 
 
 class TMDBClient:
-    def __init__(self):
+    def __init__(self, stdout: OutputWrapper, style: Style):
+        self.stdout = stdout
+        self.style = style
+
         print(f"API TOKEN FROM SETTINGS => {settings.TMDB_API_TOKEN}")
 
-        self.headers = {"accept": "application/json", "Authorization": f"Bearer {settings.TMDB_API_TOKEN}"}
+        self.headers = {
+            "accept": "application/json",
+            "Authorization": f"Bearer {settings.TMDB_API_TOKEN}",
+        }
 
         print(self.headers)
 
     def get(self, path: str, url_params: dict = {}) -> Tuple[dict, bool]:
         BASE_TMDB_API_URL = "https://api.themoviedb.org/3"
-        req = requests.get(f"{BASE_TMDB_API_URL}{path}", params=url_params, headers=self.headers)
+        req = requests.get(
+            f"{BASE_TMDB_API_URL}{path}",
+            params=url_params,
+            headers=self.headers,
+        )
         print(f"URL to querry: {req.url}")
         if req.status_code != 200:
-            print(f"[TMDB Client] An error occured during request: {req.reason}")
+            self.stdout.write(
+                self.style.ERROR(
+                    "[TMDB Client] An error occured during request: {req.reason}"
+                )
+            )
             return ({}, False)
 
         json = req.json()
 
         if json.get("success") == False:
             error_msg = json["status_message"]
-            print(f"[TMDB Client] query failed: {error_msg}")
+            self.stdout.write(
+                self.style.ERROR(f"[TMDB Client] query failed: {error_msg}")
+            )
             return (json, False)
 
         return (json, True)
@@ -66,6 +84,8 @@ class TMDBClient:
         if json["deathday"] is not None:
             deathday = parse_date(json["deathday"])
 
+        # Poor's man first / last names parsing, not a big deal since we'll
+        # almost always show `cinema.models.User.full_name`
         name = json["name"]
         name_splitted = name.split(" ")
 
@@ -102,8 +122,12 @@ class TMDBClient:
             fetch_datetime=datetime.now(),
         )
 
-    def find_movie_authors(self, tmdb_movie: MovieFromTMDB) -> Generator[AuthorFromTMDB]:
-        json, success = self.get("/movie/{tmdb_movie.id}/credits", url_params={"language": "en-US"})
+    def find_movie_authors(
+        self, tmdb_movie: MovieFromTMDB
+    ) -> Generator[AuthorFromTMDB]:
+        json, success = self.get(
+            "/movie/{tmdb_movie.id}/credits", url_params={"language": "en-US"}
+        )
 
         if not success:
             return
@@ -114,16 +138,23 @@ class TMDBClient:
                 if person_maybe:
                     yield person_maybe
 
-    def find_movies_by_titles(self, titles: List[str]) -> Generator[MovieFromTMDB]:
+    def find_movies_by_titles(
+        self, titles: List[str]
+    ) -> Generator[MovieFromTMDB]:
         for title in titles:
-            json, success = self.get("/search/movie", url_params={"page": 1, "language": "en-US", "query": title})
+            json, success = self.get(
+                "/search/movie",
+                url_params={"page": 1, "language": "en-US", "query": title},
+            )
 
             if not success:
                 # skip this title because of issue with request
                 continue
 
             if len(json["results"]) == 0:
-                print(f"[TDMB Client] No movie found on TMDB with {title} title")
+                print(
+                    f"[TDMB Client] No movie found on TMDB with {title} title"
+                )
                 continue
 
             first_res = json["results"][0]

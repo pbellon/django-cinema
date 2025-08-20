@@ -67,7 +67,9 @@ class Movie(models.Model):
     imdb_id = models.CharField(max_length=150, blank=True)
     description = models.TextField(blank=True)
     original_title = models.CharField(max_length=300, blank=True)
-    evaluation = models.IntegerField(choices=MovieEvaluation, default=MovieEvaluation.NOT_RATED)
+    evaluation = models.IntegerField(
+        choices=MovieEvaluation, default=MovieEvaluation.NOT_RATED
+    )
     tmdb_population_date = models.DateTimeField(null=True, blank=True)
     status = models.CharField(
         max_length=15,
@@ -75,7 +77,13 @@ class Movie(models.Model):
         default=MovieStatus.UNKNOWN,
     )
     budget = models.IntegerField(
-        null=True, blank=True, validators=(MinValueValidator(limit_value=0, message="Budget can't be negative"),)
+        null=True,
+        blank=True,
+        validators=(
+            MinValueValidator(
+                limit_value=0, message="Budget can't be negative"
+            ),
+        ),
     )
     release_date = models.DateField(null=True, blank=True)
     authors = models.ManyToManyField(Author, related_name="movies")
@@ -97,8 +105,13 @@ class Evaluation(models.Model):
         blank=False,
         help_text="Evaluation score",
         validators=(
-            MinValueValidator(limit_value=0, message="Score must be superior or equal to 0"),
-            MaxValueValidator(limit_value=100, message="Score must be inferior or equal to 100"),
+            MinValueValidator(
+                limit_value=0, message="Score must be superior or equal to 0"
+            ),
+            MaxValueValidator(
+                limit_value=100,
+                message="Score must be inferior or equal to 100",
+            ),
         ),
     )
     comment = models.TextField(blank=True)
@@ -108,16 +121,26 @@ class Evaluation(models.Model):
 
 
 class SpectatorMovieEvaluation(Evaluation):
-    movie = models.ForeignKey(Movie, related_name="evaluations", on_delete=models.CASCADE)
-    spectator = models.ForeignKey(Spectator, related_name="movies_evaluations", on_delete=models.CASCADE)
+    movie = models.ForeignKey(
+        Movie, related_name="evaluations", on_delete=models.CASCADE
+    )
+    spectator = models.ForeignKey(
+        Spectator, related_name="movies_evaluations", on_delete=models.CASCADE
+    )
 
     def __str__(self):
-        return f"{self.spectator.full_name} evaluation on {self.movie.title} movie"
+        return (
+            f"{self.spectator.full_name} evaluation on {self.movie.title} movie"
+        )
 
 
 class SpectatorAuthorEvaluation(Evaluation):
-    author = models.ForeignKey(Author, related_name="evaluations", on_delete=models.CASCADE)
-    spectator = models.ForeignKey(Spectator, related_name="authors_evaluations", on_delete=models.CASCADE)
+    author = models.ForeignKey(
+        Author, related_name="evaluations", on_delete=models.CASCADE
+    )
+    spectator = models.ForeignKey(
+        Spectator, related_name="authors_evaluations", on_delete=models.CASCADE
+    )
 
     def __str__(self):
         return f"{self.spectator.full_name} evaluation on {self.author.full_name} author"
@@ -125,15 +148,21 @@ class SpectatorAuthorEvaluation(Evaluation):
 
 # Spectator Favorites
 class SpectatorFavoriteMovie(models.Model):
-    spectator = models.ForeignKey(Spectator, related_name="favorite_movies", on_delete=models.CASCADE)
-    movie = models.ForeignKey(Movie, related_name="favorites", on_delete=models.CASCADE)
+    spectator = models.ForeignKey(
+        Spectator, related_name="favorite_movies", on_delete=models.CASCADE
+    )
+    movie = models.ForeignKey(
+        Movie, related_name="favorites", on_delete=models.CASCADE
+    )
 
     def __str__(self):
         return f"Movie favorite ({self.pk}) of {self.spectator.full_name}"
 
 
 class SpectatorFavoriteAuthor(models.Model):
-    spectator = models.ForeignKey(Spectator, related_name="favorite_authors", on_delete=models.CASCADE)
+    spectator = models.ForeignKey(
+        Spectator, related_name="favorite_authors", on_delete=models.CASCADE
+    )
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
 
     def __str__(self):
