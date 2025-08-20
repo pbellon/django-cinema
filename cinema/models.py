@@ -5,7 +5,12 @@ from django.utils.translation import gettext_lazy as _
 
 
 class User(AbstractUser):
-    pass
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}"
+
+    def __str__(self):
+        return self.full_name
 
 
 class Author(User):
@@ -21,6 +26,12 @@ class Author(User):
     death_day = models.DateField(null=True, blank=True)
     biography = models.TextField(blank=True)
     last_tmdb_populated = models.DateTimeField(null=True, blank=True)
+
+    def imdb_page(self):
+        if len(self.imdb_id) > 0:
+            return f"https://www.imdb.com/name/{self.imdb_id}/"
+
+        return ""
 
 
 class Spectator(User):
@@ -68,6 +79,16 @@ class Movie(models.Model):
     release_date = models.DateField(null=True, blank=True)
     authors = models.ManyToManyField(Author, related_name="movies")
 
+    @property
+    def imdb_page(self):
+        if len(self.imdb_id) > 0:
+            return f"https://www.imdb.com/title/{self.imdb_id}/"
+
+        return ""
+
+    def __str__(self):
+        return self.title
+
 
 # Spectator Evaluations
 class Evaluation(models.Model):
@@ -89,10 +110,16 @@ class SpectatorMovieEvaluation(Evaluation):
     movie = models.ForeignKey(Movie, related_name="evaluations", on_delete=models.CASCADE)
     spectator = models.ForeignKey(Spectator, related_name="movies_evaluations", on_delete=models.CASCADE)
 
+    def __str__(self):
+        return f"{self.spectator.full_name} evaluation on {self.movie.title} movie"
+
 
 class SpectatorAuthorEvaluation(Evaluation):
     author = models.ForeignKey(Author, related_name="evaluations", on_delete=models.CASCADE)
     spectator = models.ForeignKey(Spectator, related_name="authors_evaluations", on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.spectator.full_name} evaluation on {self.author.full_name} author"
 
 
 # Spectator Favorites
@@ -100,7 +127,13 @@ class SpectatorFavoriteMovie(models.Model):
     spectator = models.ForeignKey(Spectator, related_name="favorite_movies", on_delete=models.CASCADE)
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return f"Movie favorite ({self.pk}) of {self.spectator.full_name}"
+
 
 class SpectatorFavoriteAuthor(models.Model):
     spectator = models.ForeignKey(Spectator, related_name="favorite_authors", on_delete=models.CASCADE)
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Author favorite ({self.pk}) of {self.spectator.full_name}"
