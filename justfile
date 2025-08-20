@@ -33,18 +33,18 @@ bootstrap *ARGS:
 
 # Build Docker containers with optional args
 @build *ARGS:
-    docker compose build {{ ARGS }}
+    docker-compose build {{ ARGS }}
 
 # Open interactive bash console in utility container
 @console:
-    docker compose run \
+    docker-compose run \
         --no-deps \
         --rm \
         utility /bin/bash
 
 # Stop and remove containers, networks
 @down *ARGS:
-    docker compose down {{ ARGS }}
+    docker-compose down {{ ARGS }}
 
 # Format justfile with unstable formatter
 [private]
@@ -62,14 +62,15 @@ bootstrap *ARGS:
 # Compile exports dependencies from pyproject.toml into requirements.txt
 @lock:
     uv export --format requirements-txt > requirements.txt
+    docker-compose build web
 
 # Show logs from containers
 @logs *ARGS:
-    docker compose logs {{ ARGS }}
+    docker-compose logs {{ ARGS }}
 
 # Run Django management commands
 @manage *ARGS:
-    docker compose run \
+    docker-compose run \
         --no-deps \
         --rm \
         utility \
@@ -77,7 +78,7 @@ bootstrap *ARGS:
 
 # Dump database to file
 @pg_dump file='db.dump':
-    docker compose run \
+    docker-compose run \
         --no-deps \
         --rm \
         db pg_dump \
@@ -88,7 +89,7 @@ bootstrap *ARGS:
 
 # Restore database dump from file
 @pg_restore file='db.dump':
-    docker compose run \
+    docker-compose run \
         --no-deps \
         --rm \
         db pg_restore \
@@ -101,11 +102,11 @@ bootstrap *ARGS:
 
 # Restart containers
 @restart *ARGS:
-    docker compose restart {{ ARGS }}
+    docker-compose restart {{ ARGS }}
 
 # Run command in utility container
 @run *ARGS:
-    docker compose run \
+    docker-compose run \
         --no-deps \
         --rm \
         utility {{ ARGS }}
@@ -124,12 +125,12 @@ bootstrap *ARGS:
 
 # Run pytest with arguments
 @test *ARGS:
-    docker compose run \
+    docker-compose run \
         --no-deps \
         --rm \
         utility python -m pytest {{ ARGS }}
 
 # Start containers
 @up *ARGS:
-    docker compose up {{ ARGS }}
+    docker-compose up {{ ARGS }}
 

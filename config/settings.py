@@ -42,7 +42,16 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.sites",
     "django.contrib.staticfiles",
-    "cinema",  # base models
+]
+
+# Third party apps
+INSTALLED_APPS += [
+    "rest_framework",
+]
+
+# Our apps
+INSTALLED_APPS += [
+    "cinema",  # base models & admin
 ]
 
 MIDDLEWARE = [

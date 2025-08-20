@@ -26,3 +26,15 @@ it for every part I don't think necessary / not clear to me.
         - get single author
         - put author
         - delete author (only if no related movie)
+
+
+
+## TMDB usage
+
+Popuplate a movie:
+- use https://developer.themoviedb.org/reference/search-movie
+- retrieve ID in `results[0].id`
+
+
+Lookup for authors:
+- get details on https://developer.themoviedb.org/reference/person-details
