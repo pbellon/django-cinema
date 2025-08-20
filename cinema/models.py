@@ -13,10 +13,14 @@ class Author(User):
         verbose_name = "Author"
         verbose_name_plural = "Authors"
 
-    imdb_id = models.CharField(max_length=150)
-    birthday = models.DateField()
-    deathday = models.DateField(blank=True)
-    biography = models.TextField()
+    # For every of those fields, we allow null with blank=True and null=True.
+    # This means we didn't populate them via TMDB and it could be populated
+    # with dedicated `populate_from_tmdb` commmand.
+    imdb_id = models.CharField(max_length=150, blank=True)
+    birth_day = models.DateField(null=True, blank=True)
+    death_day = models.DateField(null=True, blank=True)
+    biography = models.TextField(blank=True)
+    last_tmdb_populated = models.DateTimeField(null=True, blank=True)
 
 
 class Spectator(User):
@@ -29,6 +33,7 @@ class Spectator(User):
 
 
 class MovieStatus(models.TextChoices):
+    UNKNOWN = "Unknown"
     RUMORED = "Rumored"
     IN_PRODUCTION = "In Production"
     POST_PRODUCTION = "Post Production"
@@ -47,35 +52,34 @@ class MovieEvaluation(models.IntegerChoices):
 
 # Create your models here.
 class Movie(models.Model):
-    # class MovieStatus:
-    imdb_id = models.CharField(max_length=150)
-    description = models.TextField()
     title = models.CharField(max_length=300)
-    original_title = models.CharField(max_length=300)
+    imdb_id = models.CharField(max_length=150, blank=True)
+    description = models.TextField(blank=True)
+    original_title = models.CharField(max_length=300, blank=True)
     evaluation = models.IntegerField(choices=MovieEvaluation, default=MovieEvaluation.NOT_RATED)
     status = models.CharField(
         max_length=15,
         choices=MovieStatus,
-        blank=False,
+        default=MovieStatus.UNKNOWN,
     )
-    budget = models.IntegerField(validators=(MinValueValidator(limit_value=0, message="Budget can't be negative"),))
-    release_date = models.DateField()
+    budget = models.IntegerField(
+        null=True, blank=True, validators=(MinValueValidator(limit_value=0, message="Budget can't be negative"),)
+    )
+    release_date = models.DateField(null=True, blank=True)
     authors = models.ManyToManyField(Author, related_name="movies")
 
 
 # Spectator Evaluations
 class Evaluation(models.Model):
-    score = models.DecimalField(
-        max_digits=3,
-        decimal_places=1,
+    score = models.IntegerField(
         blank=False,
         help_text="Evaluation score",
         validators=(
             MinValueValidator(limit_value=0, message="Score must be superior or equal to 0"),
-            MaxValueValidator(limit_value=10, message="Score must be inferior or equal to 10"),
+            MaxValueValidator(limit_value=100, message="Score must be inferior or equal to 100"),
         ),
     )
-    comment = models.TextField()
+    comment = models.TextField(blank=True)
 
     class Meta:
         abstract = True
@@ -99,3 +103,4 @@ class SpectatorFavoriteMovie(models.Model):
 
 class SpectatorFavoriteAuthor(models.Model):
     spectator = models.ForeignKey(Spectator, related_name="favorite_authors", on_delete=models.CASCADE)
+    author = models.ForeignKey(Author, on_delete=models.CASCADE)
