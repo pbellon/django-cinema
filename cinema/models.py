@@ -25,7 +25,7 @@ class Author(User):
     birth_day = models.DateField(null=True, blank=True)
     death_day = models.DateField(null=True, blank=True)
     biography = models.TextField(blank=True)
-    last_tmdb_populated = models.DateTimeField(null=True, blank=True)
+    tmdb_population_date = models.DateTimeField(null=True, blank=True)
 
     def imdb_page(self):
         if len(self.imdb_id) > 0:
@@ -68,6 +68,7 @@ class Movie(models.Model):
     description = models.TextField(blank=True)
     original_title = models.CharField(max_length=300, blank=True)
     evaluation = models.IntegerField(choices=MovieEvaluation, default=MovieEvaluation.NOT_RATED)
+    tmdb_population_date = models.DateTimeField(null=True, blank=True)
     status = models.CharField(
         max_length=15,
         choices=MovieStatus,
@@ -125,7 +126,7 @@ class SpectatorAuthorEvaluation(Evaluation):
 # Spectator Favorites
 class SpectatorFavoriteMovie(models.Model):
     spectator = models.ForeignKey(Spectator, related_name="favorite_movies", on_delete=models.CASCADE)
-    movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
+    movie = models.ForeignKey(Movie, related_name="favorites", on_delete=models.CASCADE)
 
     def __str__(self):
         return f"Movie favorite ({self.pk}) of {self.spectator.full_name}"

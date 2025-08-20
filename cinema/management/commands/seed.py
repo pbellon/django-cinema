@@ -1,6 +1,4 @@
-# myapp/management/commands/seed_demo_data.py
 from django.core.management.base import BaseCommand, CommandError
-from django.conf import settings
 from django.db import transaction
 from cinema.models import (
     Spectator,

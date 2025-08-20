@@ -1,4 +1,3 @@
-set dotenv-load := false
 
 # Show list of available commands
 @_default:

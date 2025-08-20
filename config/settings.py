@@ -52,6 +52,7 @@ INSTALLED_APPS += [
 # Our apps
 INSTALLED_APPS += [
     "cinema",  # base models & admin
+    "tmdb",  # TMDB API commands to populate DB
 ]
 
 MIDDLEWARE = [
@@ -115,6 +116,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 AUTH_USER_MODEL = "cinema.User"
+
+TMDB_API_TOKEN = env.str("TMDB_API_TOKEN")
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
