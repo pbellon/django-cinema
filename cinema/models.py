@@ -22,6 +22,7 @@ class Author(User):
     # This means we didn't populate them via TMDB and it could be populated
     # with dedicated `populate_from_tmdb` commmand.
     imdb_id = models.CharField(max_length=150, blank=True)
+    tmdb_id = models.IntegerField(null=True, blank=True, unique=True)
     birth_day = models.DateField(null=True, blank=True)
     death_day = models.DateField(null=True, blank=True)
     biography = models.TextField(blank=True)
@@ -90,6 +91,7 @@ class MovieEvaluation(models.IntegerChoices):
 class Movie(models.Model):
     title = models.CharField(max_length=300)
     imdb_id = models.CharField(max_length=150, blank=True)
+    tmdb_id = models.IntegerField(null=True, blank=True, unique=True)
     description = models.TextField(blank=True)
     original_title = models.CharField(max_length=300, blank=True)
     evaluation = models.IntegerField(

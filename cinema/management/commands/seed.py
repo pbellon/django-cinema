@@ -25,8 +25,6 @@ class Command(BaseCommand):
                     password="notverysecurepassword",
                 )
 
-                self.stdout.write(f"Christopher Nollan created: {nolan}")
-
                 interstellar, _ = Movie.objects.get_or_create(
                     title="Interstellar",
                 )

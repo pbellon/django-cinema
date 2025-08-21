@@ -1,11 +1,12 @@
 from dataclasses import dataclass
 from datetime import date, datetime
-from typing import Generator, List, Optional, Tuple, Iterator
+from typing import Generator, List, Optional, Tuple
 
 import requests
 from django.conf import settings
 from django.core.management.base import OutputWrapper
 from django.core.management.color import Style
+from django.utils import timezone
 
 
 @dataclass
@@ -15,7 +16,7 @@ class MovieFromTMDB:
     original_title: str
     imdb_id: str
     tmdb_id: int
-    release_date: date
+    release_date: Optional[date]
     fetch_datetime: datetime
     status: str
     vote: float
@@ -64,7 +65,7 @@ class TMDBClient:
         if req.status_code != 200:
             self.stdout.write(
                 self.style.ERROR(
-                    "[TMDB Client] An error occured during request: {req.reason}"
+                    f"[TMDB Client] An error occured during request: {req.reason}"
                 )
             )
             return ({}, False)
@@ -81,54 +82,63 @@ class TMDBClient:
         return (result, True)
 
     def get_author(
-        self, id: int, db_id: Optional[int] = None
+        self, author_id: int, db_id: Optional[int] = None
     ) -> Optional[AuthorFromTMDB]:
         result, success = self.get(
-            f"/person/{id}", params={"append_to_response": "movie_credits"}
+            f"/person/{author_id}",
+            params={"append_to_response": "movie_credits"},
         )
 
         if not success:
             return None
 
+        name = result["name"] or ""
+        biography = result["biography"] or ""
+        deathday_str = result["deathday"] or ""
+        birthday_str = result["birthday"] or ""
+        imdb_id = result["imdb_id"] or ""
+
         deathday = None
         birthday = None
 
-        if result["deathday"] is not None:
-            deathday = parse_date(result["deathday"])
+        if len(deathday_str) > 0:
+            deathday = parse_date(deathday_str)
 
-        if result["birthday"] is not None:
-            birthday = parse_date(result["birthday"])
+        if len(birthday_str) > 0:
+            birthday = parse_date(birthday_str)
+
+        # Fail if no name is detected, will break further features
+        if len(name) == 0:
+            raise Exception("Missing `name` attribute in fetched author")
 
         # Poor's man first / last names parsing, not a big deal since we'll
         # almost always show `cinema.models.User.full_name`
-        name = result["name"]
         name_splitted = name.split(" ")
-
         first_name = name_splitted[0]
-        last_name = " ".join(name_splitted[1:])
+        last_name = ""
+
+        if len(name_splitted) > 1:
+            last_name = " ".join(name_splitted[1:])
 
         directing_movie_ids = map(
             lambda role: role["id"],
             filter(
                 lambda role: role.get("job") == "Director",
-                result["movie_credits"]["cast"],
+                result["movie_credits"]["crew"],
             ),
         )
-
-        if result["birthday"] is None:
-            print(f"Found undefined birthday for author {id}")
 
         return AuthorFromTMDB(
             db_id=db_id,
             birthday=birthday,
-            biography=result["biography"],
+            biography=biography,
             deathday=deathday,
             first_name=first_name,
             last_name=last_name,
-            tmdb_id=result["id"],
-            imdb_id=result["imdb_id"],
+            tmdb_id=author_id,
+            imdb_id=imdb_id,
             directing_movies_ids=list(directing_movie_ids),
-            fetch_datetime=datetime.now(),
+            fetch_datetime=timezone.now(),
         )
 
     def get_movie(
@@ -142,10 +152,10 @@ class TMDBClient:
             return None
 
         title = result["title"]
-        original_title = result["original_title"]
-        release_date_str = result["release_date"]
+        original_title = result["original_title"] or ""
+        release_date_str = result["release_date"] or ""
         tmdb_id = result["id"]
-        imdb_id = result["imdb_id"]
+        imdb_id = result["imdb_id"] or ""
 
         director_ids = map(
             lambda cast: cast["id"],
@@ -155,17 +165,21 @@ class TMDBClient:
             ),
         )
 
+        release_date = None
+        if release_date_str and len(release_date_str) > 0:
+            release_date = parse_date(release_date_str)
+
         return MovieFromTMDB(
             db_id=db_id,
             title=title,
             original_title=original_title,
-            release_date=parse_date(release_date_str),
+            release_date=release_date,
             imdb_id=imdb_id,
             tmdb_id=tmdb_id,
             vote=result["vote_average"],
             status=result["status"],
             overview=result["overview"],
-            fetch_datetime=datetime.now(),
+            fetch_datetime=timezone.now(),
             directors_ids=list(director_ids),
         )
 
@@ -173,7 +187,7 @@ class TMDBClient:
         self, titles: List[Tuple[str, int]]
     ) -> Generator[MovieFromTMDB]:
         for title, id in titles:
-            json, success = self.get(
+            search_results, success = self.get(
                 "/search/movie",
                 params={"page": 1, "language": "en-US", "query": title},
             )
@@ -182,7 +196,7 @@ class TMDBClient:
                 # skip this title because of issue with request
                 continue
 
-            if len(json["results"]) == 0:
+            if len(search_results["results"]) == 0:
                 self.stdout(
                     self.style.ERROR(
                         f"[TDMB Client] No movie found on TMDB with {title} title"
@@ -190,8 +204,7 @@ class TMDBClient:
                 )
                 continue
 
-            first_res = json["results"][0]
-
+            first_res = search_results["results"][0]
             maybe_movie = self.get_movie(first_res["id"], db_id=id)
 
             if maybe_movie:
@@ -201,8 +214,10 @@ class TMDBClient:
         self, names: List[Tuple[str, int]]
     ) -> Generator[AuthorFromTMDB]:
         for name, id in names:
-            json, success = self.get(
-                "/search/movie",
+            # ipdb.set_trace()
+
+            search_results, success = self.get(
+                "/search/person",
                 params={"page": 1, "language": "en-US", "query": name},
             )
 
@@ -210,7 +225,7 @@ class TMDBClient:
                 # skip this title because of issue with request
                 continue
 
-            if len(json["results"]) == 0:
+            if len(search_results["results"]) == 0:
                 self.stdout(
                     self.style.ERROR(
                         f"[TDMB Client] No author found on TMDB with {name} name"
@@ -218,8 +233,16 @@ class TMDBClient:
                 )
                 continue
 
-            first_res = json["results"][0]
-            maybe_author = self.get_author(first_res["id"], db_id=id)
+            first_res = search_results["results"][0]
+            try:
+                maybe_author = self.get_author(first_res["id"], db_id=id)
 
-            if maybe_author:
-                yield maybe_author
+                if maybe_author:
+                    yield maybe_author
+
+            except Exception as e:
+                self.stdout.write(
+                    self.style.ERROR(
+                        f"An unexpected error occured while fetching author {name}: {e}"
+                    )
+                )

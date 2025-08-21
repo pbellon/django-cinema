@@ -10,6 +10,7 @@ dependencies = [
     "django>=5.2.5",
     "djangorestframework>=3.16.1",
     "environs[django]>=14.3.0",
+    "ipdb>=0.13.13",
     "markdown>=3.8.2",
     "psycopg[binary]>=3.2.9",
     "requests>=2.32.5",
@@ -71,6 +72,7 @@ unfixable = []
 
 [dependency-groups]
 dev = [
+    "ipdb>=0.13.13",
     "model-bakery>=1.20.5",
     "pytest>=8.4.1",
     "pytest-cov>=6.2.1",
