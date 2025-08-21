@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404, redirect
-from rest_framework import mixins, permissions, status, viewsets
+from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -13,17 +13,26 @@ from api.serializers import (
     CreateFavoriteMovieSerializer,
     MovieDetailsSerializer,
     MovieListSerializer,
+    SpectatorAuthorEvaluationSerializer,
+    SpectatorMovieEvaluationSerializer,
 )
+from api.utils import get_spectator_from_request
 from cinema.models import (
     Author,
     Movie,
-    Spectator,
+    SpectatorAuthorEvaluation,
+    SpectatorMovieEvaluation,
 )
 
 
-class MovieViewSet(CreationSourceFilterMixin, ModelViewSet):
+class MovieViewSet(
+    CreationSourceFilterMixin,
+    mixins.ListModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
     queryset = Movie.objects.all()
-    http_method_names = ["get", "put", "patch", "head", "options"]
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -58,10 +67,37 @@ class MovieViewSet(CreationSourceFilterMixin, ModelViewSet):
         serializer = self.get_serializer(qs, many=True)
         return Response(serializer.data)
 
+    @action(detail=True, methods=["post"])
+    def evaluate(self, request, pk):
+        movie = self.get_object()
+        spectator = get_spectator_from_request(request)
 
-class AuthorViewSet(CreationSourceFilterMixin, ModelViewSet):
+        ser = SpectatorMovieEvaluationSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+
+        obj, created = SpectatorMovieEvaluation.objects.update_or_create(
+            movie=movie,
+            spectator=spectator,
+            defaults={
+                "score": ser.validated_data["score"],
+                "comment": ser.validated_data.get("comment", ""),
+            },
+        )
+        out = SpectatorMovieEvaluationSerializer(obj)
+        return Response(
+            out.data,
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+        )
+
+
+class AuthorViewSet(
+    CreationSourceFilterMixin,
+    mixins.ListModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
     queryset = Author.objects.all()
-    http_method_names = ["get", "put", "patch", "delete", "head", "options"]
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -98,11 +134,27 @@ class AuthorViewSet(CreationSourceFilterMixin, ModelViewSet):
 
         return super().destroy(request, *args, **kwargs)
 
+    @action(detail=True, methods=["post"])
+    def evaluate(self, request, pk=None):
+        author = self.get_object()
+        spectator = get_spectator_from_request(request)
 
-def get_spectator_from_request(request):
-    user = request.user
-    spectator = Spectator.objects.get(pk=user.pk)
-    return spectator
+        ser = SpectatorAuthorEvaluationSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+
+        obj, created = SpectatorAuthorEvaluation.objects.update_or_create(
+            author=author,
+            spectator=spectator,
+            defaults={
+                "score": ser.validated_data["score"],
+                "comment": ser.validated_data.get("comment", ""),
+            },
+        )
+        out = SpectatorAuthorEvaluationSerializer(obj)
+        return Response(
+            out.data,
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+        )
 
 
 # Favorites viewsets
@@ -112,7 +164,7 @@ class FavoriteMoviesViewSet(
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet,
 ):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     lookup_url_kwarg = "pk"
     lookup_field = "pk"
 
@@ -146,7 +198,7 @@ class FavoriteAuthorsViewSet(
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet,
 ):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     lookup_url_kwarg = "pk"  # <author_id> in URL
     lookup_field = "pk"
 

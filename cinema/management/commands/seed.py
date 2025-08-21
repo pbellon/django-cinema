@@ -5,8 +5,6 @@ from cinema.models import (
     Movie,
     SpectatorAuthorEvaluation,
     SpectatorMovieEvaluation,
-    SpectatorFavoriteMovie,
-    SpectatorFavoriteAuthor,
     Author,
 )
 
@@ -68,17 +66,10 @@ class Command(BaseCommand):
                     email="janedoe@not-real-email.com",
                     password="janedoe1234",
                 )
+
                 # Add Interstallar to Jane's favorite movies
-                jane_fav_movie, _ = (
-                    SpectatorFavoriteMovie.objects.get_or_create(
-                        spectator=janedoe, movie=interstellar
-                    )
-                )
-                jane_fav_author, _ = (
-                    SpectatorFavoriteAuthor.objects.get_or_create(
-                        spectator=janedoe, author=nolan
-                    )
-                )
+                janedoe.favorite_movies.add(interstellar)
+                janedoe.favorite_authors.add(nolan)
 
                 # Jane evaluation on interstellar with a comment
                 jane_interstellar_eval, _ = (

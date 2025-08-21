@@ -1,6 +1,12 @@
 from rest_framework import serializers
 
-from cinema.models import Movie, Author, Spectator
+from cinema.models import (
+    Movie,
+    Author,
+    Spectator,
+    SpectatorMovieEvaluation,
+    SpectatorAuthorEvaluation,
+)
 
 
 class AuthorListSerializer(serializers.ModelSerializer):
@@ -92,3 +98,17 @@ class CreateFavoriteAuthorSerializer(serializers.Serializer):
     author_id = serializers.PrimaryKeyRelatedField(
         queryset=Author.objects.all(), source="author"
     )
+
+
+class SpectatorMovieEvaluationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SpectatorMovieEvaluation
+        fields = ["id", "movie", "spectator", "score", "comment"]
+        read_only_fields = ["movie", "spectator"]
+
+
+class SpectatorAuthorEvaluationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SpectatorAuthorEvaluation
+        fields = ["id", "author", "spectator", "score", "comment"]
+        read_only_fields = ["author", "spectator"]

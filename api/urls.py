@@ -8,9 +8,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
-from api.views import (
-    RegisterSpectatorView,
-)
+from api.views import RegisterSpectatorView
 from api.viewsets import (
     AuthorViewSet,
     FavoriteAuthorsViewSet,
@@ -67,7 +65,6 @@ urlpatterns = [
         TokenBlacklistView.as_view(),
         name="token_invalidate",
     ),
-    # custom API views
     # viewsets routes
     path("", include(api_router.urls)),
 ]

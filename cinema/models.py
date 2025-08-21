@@ -47,14 +47,6 @@ class Author(User):
         return ""
 
 
-class Spectator(User):
-    class Meta:
-        verbose_name = "Spectator"
-        verbose_name_plural = "Spectators"
-
-    biography = models.TextField(blank=True)
-
-
 class MovieStatus(models.TextChoices):
     UNKNOWN = "Unknown"
     RUMORED = "Rumored"
@@ -147,6 +139,21 @@ class Movie(models.Model):
         return self.title
 
 
+class Spectator(User):
+    class Meta:
+        verbose_name = "Spectator"
+        verbose_name_plural = "Spectators"
+
+    biography = models.TextField(blank=True)
+
+    favorite_movies = models.ManyToManyField(Movie, related_name="favorited_by")
+
+    favorite_authors = models.ManyToManyField(
+        Author,
+        related_name="favorited_by",
+    )
+
+
 # Spectator Evaluations
 class Evaluation(models.Model):
     score = models.IntegerField(
@@ -192,26 +199,3 @@ class SpectatorAuthorEvaluation(Evaluation):
 
     def __str__(self):
         return f"{self.spectator.full_name} evaluation on {self.author.full_name} author"
-
-
-# Spectator Favorites
-class SpectatorFavoriteMovie(models.Model):
-    spectator = models.ForeignKey(
-        Spectator, related_name="favorite_movies", on_delete=models.CASCADE
-    )
-    movie = models.ForeignKey(
-        Movie, related_name="favorites", on_delete=models.CASCADE
-    )
-
-    def __str__(self):
-        return f"Movie favorite ({self.pk}) of {self.spectator.full_name}"
-
-
-class SpectatorFavoriteAuthor(models.Model):
-    spectator = models.ForeignKey(
-        Spectator, related_name="favorite_authors", on_delete=models.CASCADE
-    )
-    author = models.ForeignKey(Author, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f"Author favorite ({self.pk}) of {self.spectator.full_name}"

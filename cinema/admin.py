@@ -10,30 +10,13 @@ from cinema.models import (
     Spectator,
     Author,
     Movie,
-    User,
     SpectatorAuthorEvaluation,
     SpectatorMovieEvaluation,
-    SpectatorFavoriteMovie,
-    SpectatorFavoriteAuthor,
 )
 
 # Unregister default models
 admin.site.unregister(Group)
 admin.site.unregister(Site)
-
-
-class SpectatorFavoriteMoviesInline(admin.TabularInline):
-    model = SpectatorFavoriteMovie
-    extra = 1
-    show_change_link = True
-    raw_id_fields = ["spectator"]
-
-
-class SpectatorFavoriteAuthorsInline(admin.TabularInline):
-    model = SpectatorFavoriteAuthor
-    extra = 1
-    show_change_link = True
-    raw_id_fields = ["spectator"]
 
 
 class FullNameColumnMixin:
@@ -73,10 +56,6 @@ class SpectatorAdmin(FullNameColumnMixin, admin.ModelAdmin):
         "groups",
         "user_permissions",
     )
-    inlines = [
-        SpectatorFavoriteAuthorsInline,
-        SpectatorFavoriteMoviesInline,
-    ]
 
 
 @admin.display(description="IMDB page")
@@ -147,32 +126,6 @@ class MovieAdmin(admin.ModelAdmin):
     list_filter = ["release_date", "evaluation", "status"]
     readonly_fields = ("creation_source",)
     inlines = [MovieEvaluationsInline]
-
-
-@admin.register(SpectatorFavoriteAuthor)
-class FavoriteAuthorAdmin(admin.ModelAdmin):
-    list_display = ["spectator_full_name", "author_full_name"]
-
-    @admin.display(description="Spectator")
-    def spectator_full_name(self, obj):
-        return obj.spectator.full_name
-
-    @admin.display(description="Author")
-    def author_full_name(self, obj):
-        return obj.author.full_name
-
-
-@admin.register(SpectatorFavoriteMovie)
-class FavoriteMovieAdmin(admin.ModelAdmin):
-    list_display = ["spectator_full_name", "movie_title"]
-
-    @admin.display(description="Spectator")
-    def spectator_full_name(self, obj):
-        return obj.spectator.full_name
-
-    @admin.display(description="Movie")
-    def movie_title(self, obj):
-        return obj.movie.title
 
 
 @admin.register(SpectatorMovieEvaluation)
