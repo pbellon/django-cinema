@@ -115,8 +115,10 @@ class AuthorMoviesInline(admin.TabularInline):
 class AuthorAdmin(FullNameColumnMixin, admin.ModelAdmin):
     list_display = (
         "full_name_admin",
+        "creation_source",
         imdb_page_admin,
     )
+    readonly_fields = ("creation_source",)
 
     list_filter = [AuthorsMoviesFilter]
 
@@ -141,8 +143,9 @@ class MovieEvaluationsInline(admin.TabularInline):
 
 @admin.register(Movie)
 class MovieAdmin(admin.ModelAdmin):
-    list_display = ("title", "release_date", imdb_page_admin)
+    list_display = ("title", "release_date", imdb_page_admin, "creation_source")
     list_filter = ["release_date", "evaluation", "status"]
+    readonly_fields = ("creation_source",)
     inlines = [MovieEvaluationsInline]
 
 

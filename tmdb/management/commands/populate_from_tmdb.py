@@ -7,6 +7,7 @@ from django.db import transaction
 from django.db.models import Value
 from django.db.models.functions import Concat
 from cinema.models import (
+    CreationSource,
     Movie,
     MovieEvaluation,
     MovieStatus,
@@ -154,7 +155,7 @@ class Command(BaseCommand):
             if tmdb_movie is None:
                 continue
 
-            _, created_movie = Movie.objects.update_or_create(
+            movie, created_movie = Movie.objects.update_or_create(
                 tmdb_id=tmdb_movie.tmdb_id,
                 defaults=dict(
                     description=tmdb_movie.overview,
@@ -168,6 +169,9 @@ class Command(BaseCommand):
             )
 
             if created_movie:
+                movie.creation_source = CreationSource.TMDB
+                movie.save(update_fields=["creation_source"])
+
                 stats.created_movies += 1
             else:
                 stats.updated_movies += 1
@@ -192,7 +196,7 @@ class Command(BaseCommand):
             if tmdb_author is None:
                 continue
 
-            _, created_author = Author.objects.update_or_create(
+            author, created_author = Author.objects.update_or_create(
                 tmdb_id=tmdb_author.tmdb_id,
                 defaults=dict(
                     username=f"{tmdb_author.first_name}_{tmdb_author.last_name}",
@@ -207,6 +211,8 @@ class Command(BaseCommand):
             )
 
             if created_author:
+                author.creation_source = CreationSource.TMDB
+                author.save(update_fields=["creation_source"])
                 stats.created_authors += 1
             else:
                 stats.updated_authors += 1

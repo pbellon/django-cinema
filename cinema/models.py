@@ -4,6 +4,11 @@ from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 
 
+class CreationSource(models.TextChoices):
+    ADMIN = "ADMIN", "Admin"
+    TMDB = "TMDB", "TMDb"
+
+
 class User(AbstractUser):
     @property
     def full_name(self):
@@ -27,6 +32,12 @@ class Author(User):
     death_day = models.DateField(null=True, blank=True)
     biography = models.TextField(blank=True)
     tmdb_population_date = models.DateTimeField(null=True, blank=True)
+    creation_source = models.CharField(
+        max_length=5,
+        choices=CreationSource,
+        default=CreationSource.ADMIN,
+        editable=False,
+    )
 
     @property
     def imdb_page(self):
@@ -69,19 +80,22 @@ class MovieEvaluation(models.IntegerChoices):
     VERY_GOOD = 5, _("Very Good")
 
     def from_vote(vote: float) -> int:
-        if vote > 0 and vote <= 22:
+        """
+        Convert TMDB vote to MovieEvaluation
+        """
+        if vote > 0 and vote <= 2.2:
             return MovieEvaluation.VERY_BAD
 
-        if vote > 22 and vote <= 45:
+        if vote > 2.2 and vote <= 4.5:
             return MovieEvaluation.BAD
 
-        if vote > 45 and vote <= 55:
+        if vote > 4.5 and vote <= 5.5:
             return MovieEvaluation.MEDIUM
 
-        if vote > 55 and vote < 75:
+        if vote > 5.5 and vote < 7.5:
             return MovieEvaluation.GOOD
 
-        if vote > 75 and vote <= 100:
+        if vote > 7.5 and vote <= 10:
             return MovieEvaluation.VERY_GOOD
 
         return MovieEvaluation.NOT_RATED  # either vote == 0 or invalid vote
@@ -113,6 +127,13 @@ class Movie(models.Model):
         ),
     )
     release_date = models.DateField(null=True, blank=True)
+    creation_source = models.CharField(
+        max_length=5,
+        choices=CreationSource,
+        default=CreationSource.ADMIN,
+        editable=False,
+    )
+
     authors = models.ManyToManyField(Author, related_name="movies")
 
     @property
