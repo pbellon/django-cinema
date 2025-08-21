@@ -28,6 +28,7 @@ class Author(User):
     biography = models.TextField(blank=True)
     tmdb_population_date = models.DateTimeField(null=True, blank=True)
 
+    @property
     def imdb_page(self):
         if len(self.imdb_id) > 0:
             return f"https://www.imdb.com/name/{self.imdb_id}/"
