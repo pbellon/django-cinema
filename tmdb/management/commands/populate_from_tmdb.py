@@ -126,8 +126,6 @@ class Command(BaseCommand):
 
             already_populated_authors.add(tmdb_author.tmdb_id)
 
-            print(f"Detected movie ids: {tmdb_author.directing_movies_ids}")
-
             detected_movie_ids.update(tmdb_author.directing_movies_ids)
 
             # Add this author mapping
@@ -143,6 +141,10 @@ class Command(BaseCommand):
 
         new_movies_detected = detected_movie_ids.difference(
             already_populated_movies
+        )
+
+        self.stdout.write(
+            f"Detected {len(new_authors_detected)} authors and {len(new_movies_detected)} movies to additionnaly fetch from TMDB "
         )
 
         # Fetch newly detected movies
@@ -191,6 +193,7 @@ class Command(BaseCommand):
             _, created_author = Author.objects.update_or_create(
                 tmdb_id=tmdb_author.tmdb_id,
                 defaults=dict(
+                    username=f"{tmdb_author.first_name}_{tmdb_author.last_name}",
                     first_name=tmdb_author.first_name,
                     last_name=tmdb_author.last_name,
                     biography=tmdb_author.biography,
@@ -260,12 +263,22 @@ class Command(BaseCommand):
 
         Through = Movie.authors.through
 
+        pairs = set()
+
         # Construct movie pk to author pk pairs set
-        pairs = {
-            (movie_id_map[movie_tmdb_id], author_id_map[author_tmdb])
-            for movie_tmdb_id, author_tmdb_id_set in mapping.items()
-            for author_tmdb in author_tmdb_id_set
-        }
+        for movie_tmdb_id, author_tmdb_id_set in mapping.items():
+            movie_id = movie_id_map.get(movie_tmdb_id)
+
+            if movie_id is None:
+                continue
+
+            for author_tmdb in author_tmdb_id_set:
+                author_id = author_id_map.get(author_tmdb)
+
+                if author_id is None:
+                    continue
+
+                pairs.add((movie_id, author_id))
 
         rows = [
             Through(movie_id=movie_id, author_id=author_id)

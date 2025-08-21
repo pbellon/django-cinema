@@ -72,7 +72,7 @@ class TMDBClient:
 
         result = req.json()
 
-        if result.get("success") == False:  # noqa: E712
+        if not result.get("success", True):
             error_msg = result["status_message"]
             self.stdout.write(
                 self.style.ERROR(f"[TMDB Client] query failed: {error_msg}")
@@ -82,21 +82,21 @@ class TMDBClient:
         return (result, True)
 
     def get_author(
-        self, author_id: int, db_id: Optional[int] = None
+        self, tmdb_author_id: int, db_id: Optional[int] = None
     ) -> Optional[AuthorFromTMDB]:
         result, success = self.get(
-            f"/person/{author_id}",
+            f"/person/{tmdb_author_id}",
             params={"append_to_response": "movie_credits"},
         )
 
         if not success:
             return None
 
-        name = result["name"] or ""
-        biography = result["biography"] or ""
-        deathday_str = result["deathday"] or ""
-        birthday_str = result["birthday"] or ""
-        imdb_id = result["imdb_id"] or ""
+        name = result.get("name") or ""
+        biography = result.get("biography") or ""
+        deathday_str = result.get("deathday") or ""
+        birthday_str = result.get("birthday") or ""
+        imdb_id = result.get("imdb_id") or ""
 
         deathday = None
         birthday = None
@@ -135,17 +135,17 @@ class TMDBClient:
             deathday=deathday,
             first_name=first_name,
             last_name=last_name,
-            tmdb_id=author_id,
+            tmdb_id=tmdb_author_id,
             imdb_id=imdb_id,
             directing_movies_ids=list(directing_movie_ids),
             fetch_datetime=timezone.now(),
         )
 
     def get_movie(
-        self, id: int, db_id: Optional[int] = None
+        self, tmdb_movie_id: int, db_id: Optional[int] = None
     ) -> Optional[MovieFromTMDB]:
         result, success = self.get(
-            f"/movie/{id}", params={"append_to_response": "credits"}
+            f"/movie/{tmdb_movie_id}", params={"append_to_response": "credits"}
         )
 
         if not success:
@@ -154,7 +154,6 @@ class TMDBClient:
         title = result["title"]
         original_title = result["original_title"] or ""
         release_date_str = result["release_date"] or ""
-        tmdb_id = result["id"]
         imdb_id = result["imdb_id"] or ""
 
         director_ids = map(
@@ -175,7 +174,7 @@ class TMDBClient:
             original_title=original_title,
             release_date=release_date,
             imdb_id=imdb_id,
-            tmdb_id=tmdb_id,
+            tmdb_id=tmdb_movie_id,
             vote=result["vote_average"],
             status=result["status"],
             overview=result["overview"],
