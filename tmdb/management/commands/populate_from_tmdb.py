@@ -86,6 +86,7 @@ class Command(BaseCommand):
                 description=tmdb_movie.overview,
                 evaluation=MovieEvaluation.from_vote(tmdb_movie.vote),
                 imdb_id=tmdb_movie.imdb_id,
+                release_date=tmdb_movie.release_date,
                 status=MovieStatus.from_status(tmdb_movie.status),
                 title=tmdb_movie.title,
                 tmdb_id=tmdb_movie.tmdb_id,
@@ -156,11 +157,12 @@ class Command(BaseCommand):
             _, created_movie = Movie.objects.update_or_create(
                 tmdb_id=tmdb_movie.tmdb_id,
                 defaults=dict(
-                    title=tmdb_movie.title,
                     description=tmdb_movie.overview,
                     evaluation=MovieEvaluation.from_vote(tmdb_movie.vote),
                     imdb_id=tmdb_movie.imdb_id,
+                    release_date=tmdb_movie.release_date,
                     status=MovieStatus.from_status(tmdb_movie.status),
+                    title=tmdb_movie.title,
                     tmdb_population_date=tmdb_movie.fetch_datetime,
                 ),
             )

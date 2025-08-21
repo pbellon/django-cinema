@@ -114,6 +114,7 @@ django==5.2.5 \
     #   dj-database-url
     #   django-filter
     #   djangorestframework
+    #   djangorestframework-simplejwt
     #   model-bakery
 django-cache-url==3.4.5 \
     --hash=sha256:5f350759978483ab85dc0e3e17b3d53eed3394a28148f6bf0f53d11d0feb5b3c \
@@ -130,6 +131,12 @@ django-filter==25.1 \
 djangorestframework==3.16.1 \
     --hash=sha256:166809528b1aced0a17dc66c24492af18049f2c9420dbd0be29422029cfc3ff7 \
     --hash=sha256:33a59f47fb9c85ede792cbf88bde71893bcda0667bc573f784649521f1102cec
+    # via
+    #   cinema
+    #   djangorestframework-simplejwt
+djangorestframework-simplejwt==5.5.1 \
+    --hash=sha256:2c30f3707053d384e9f315d11c2daccfcb548d4faa453111ca19a542b732e469 \
+    --hash=sha256:e72c5572f51d7803021288e2057afcbd03f17fe11d484096f40a460abc76e87f
     # via cinema
 environs==14.3.0 \
     --hash=sha256:20672d92db325ce8114872b1989104eb84f083486325b5a44bcddff56472a384 \
@@ -232,6 +239,10 @@ pygments==2.19.2 \
     #   ipython
     #   ipython-pygments-lexers
     #   pytest
+pyjwt==2.10.1 \
+    --hash=sha256:3cc5772eb20009233caf06e9d8a0577824723b44e6648ee0a2aedb6cf9381953 \
+    --hash=sha256:dcdd193e30abefd5debf142f9adfcdd2b58004e644f25406ffaebd50bd98dacb
+    # via djangorestframework-simplejwt
 pytest==8.4.1 \
     --hash=sha256:539c70ba6fcead8e78eebbf1115e8b589e7565830d7d006a8723f19ac8a0afb7 \
     --hash=sha256:7c67fd69174877359ed9371ec3af8a3d2b04741818c51e5e99cc1742251fa93c

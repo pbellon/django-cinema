@@ -152,8 +152,8 @@ class TMDBClient:
             return None
 
         title = result["title"]
-        original_title = result["original_title"] or ""
-        release_date_str = result["release_date"] or ""
+        original_title = result.get("original_title") or ""
+        release_date_str = result.get("release_date") or ""
         imdb_id = result["imdb_id"] or ""
 
         director_ids = map(
@@ -165,6 +165,7 @@ class TMDBClient:
         )
 
         release_date = None
+
         if release_date_str and len(release_date_str) > 0:
             release_date = parse_date(release_date_str)
 

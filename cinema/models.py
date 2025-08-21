@@ -41,7 +41,6 @@ class Spectator(User):
         verbose_name_plural = "Spectators"
 
     biography = models.TextField(blank=True)
-    avatar = models.FileField(blank=True)
 
 
 class MovieStatus(models.TextChoices):
