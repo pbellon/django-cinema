@@ -176,6 +176,14 @@ class Evaluation(models.Model):
 
 
 class SpectatorMovieEvaluation(Evaluation):
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["spectator", "movie"],
+                name="unique_spectator_movie_evaluation",
+            )
+        ]
+
     movie = models.ForeignKey(
         Movie, related_name="evaluations", on_delete=models.CASCADE
     )
@@ -190,6 +198,14 @@ class SpectatorMovieEvaluation(Evaluation):
 
 
 class SpectatorAuthorEvaluation(Evaluation):
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["spectator", "author"],
+                name="unique_spectator_author_evaluation",
+            )
+        ]
+
     author = models.ForeignKey(
         Author, related_name="evaluations", on_delete=models.CASCADE
     )
