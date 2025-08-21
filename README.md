@@ -18,6 +18,63 @@ npm install -g just
 ```
 
 
+## Quick start
+
+1. Bootstrap the app, will create `.env` file for django configuration env variables
+```bash
+just bootstrap
+```
+
+2. Configure `.env`, needs a valid TMDB token in `TMDB_API_TOKEN` to work properly
+
+3. Start django
+```bash
+just up
+```
+
+4. After that you'll need some initial data (movies, authors and maybe links between them). You can use the `seed` command to quickly do that. It will create some authors, movies and spectators data.
+
+```bash
+just manage seed
+```
+
+5. Run `populate_from_tmdb` command to start fetching data from TMDB. You can run it multiple times to fetch additionnal data.
+```bash
+just manage populate_from_tmdb
+```
+
+## API endpoints
+
+### Movies endpoints
+- `GET /api/movies/` - list all movies
+  - Can be filtered with `?creation_source=<source>`, source can be `admin` or `tmdb`. 
+- `GET /api/movies/<id>/` retrieve a single movie __(requires authentication)__
+- `GET /api/movies/by-year/<year>/` list all movies of year set in URL __(requires authentication)__
+- `PUT /api/movies/<id>/` update a single movie __(requires authentication)__
+
+### Author
+- `GET /api/authors/` list all authors
+  - Can be filtered with `?creation_source=<source>`, source can be `admin` or `tmdb`.
+- `GET /api/authors/<id>/` retrieve single author __(requires authentication)__
+- `PUT /api/authors/<id>/` update a single author __(requires authentication)__
+- `DELETE /api/authors/<id>/` delete a single author __(requires authentication)__
+
+
+### Authentication
+- `POST /api/register` register yourself as a spectator
+- `POST /api/token/` create a JWT token to use the endpoints requiring authentication
+- `POST /api/token/refresh/` refresh JWT token and obtain a new access token
+- `POST /api/token/invalidate/` invalidate a given JWT token and logout
+
+
+## Improvement points
+Those are points not handled I would have added with more time
+- Don't rely on `manage.py runserver` and instead use `gunicorn`
+- Use `nginx` to:
+  - serve collected staticfiles
+  - configure a reverse proxy to gunicon
+- Use caching on some endpoints, especially public ones
+- Add tests on all endpoints and core functionnalities
 
 ## Usage
 
@@ -27,9 +84,6 @@ $ just bootstrap
 
 # Build our Docker Image
 $ just build
-
-# Run Migrations
-$ just manage migrate
 
 # Create a Superuser in Django
 $ just manage createsuperuser
@@ -55,6 +109,8 @@ $ just lint
 # Re-build PIP requirements
 $ just lock
 ```
+
+
 
 ## `just` Commands
 

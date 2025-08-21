@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from cinema.models import Movie, Author, Spectator, SpectatorFavoriteAuthor
+from cinema.models import Movie, Author, Spectator
 
 
 class AuthorListSerializer(serializers.ModelSerializer):
@@ -24,10 +24,6 @@ class MovieListSerializer(serializers.ModelSerializer):
 
 
 class AuthorDetailsSerializer(serializers.ModelSerializer):
-    # full_name = CharField(read_only=True)
-
-    first_name = serializers.CharField()
-    last_name = serializers.CharField()
     movies = MovieListSerializer(many=True, read_only=True)
 
     class Meta:
@@ -96,25 +92,3 @@ class CreateFavoriteAuthorSerializer(serializers.Serializer):
     author_id = serializers.PrimaryKeyRelatedField(
         queryset=Author.objects.all(), source="author"
     )
-
-
-class FavoriteAuthorSerializer(serializers.ModelSerializer):
-    movie = MovieDetailsSerializer()
-    delete_url = serializers.HyperlinkedIdentityField(
-        view_name="favorite-movie", lookup_field="pk"
-    )
-
-    class Meta:
-        model = SpectatorFavoriteAuthor
-        fields = ["id", "delete_url", "movie"]
-
-
-class FavoriteMovieSerializer(serializers.ModelSerializer):
-    author = AuthorDetailsSerializer()
-    delete_url = serializers.HyperlinkedIdentityField(
-        view_name="favorite-author", lookup_field="pk"
-    )
-
-    class Meta:
-        model = SpectatorFavoriteAuthor
-        fields = ["id", "delete_url", "author"]
