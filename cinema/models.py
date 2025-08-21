@@ -51,6 +51,13 @@ class MovieStatus(models.TextChoices):
     RELEASED = "Released"
     CANCELED = "Canceled"
 
+    # Not sure
+    def from_status(status: str):
+        if status in MovieStatus.values:
+            return status
+
+        return MovieStatus.UNKNOWN
+
 
 class MovieEvaluation(models.IntegerChoices):
     NOT_RATED = 0, _("Not Rated")
@@ -59,6 +66,24 @@ class MovieEvaluation(models.IntegerChoices):
     MEDIUM = 3, _("Medium")
     GOOD = 4, _("Good")
     VERY_GOOD = 5, _("Very Good")
+
+    def from_vote(vote: float) -> int:
+        if vote > 0 and vote <= 22:
+            return MovieEvaluation.VERY_BAD
+
+        if vote > 22 and vote <= 45:
+            return MovieEvaluation.BAD
+
+        if vote > 45 and vote <= 55:
+            return MovieEvaluation.MEDIUM
+
+        if vote > 55 and vote < 75:
+            return MovieEvaluation.GOOD
+
+        if vote > 75 and vote <= 100:
+            return MovieEvaluation.VERY_GOOD
+
+        return MovieEvaluation.NOT_RATED  # either vote == 0 or invalid vote
 
 
 # Create your models here.
