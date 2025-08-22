@@ -170,6 +170,7 @@ class FavoriteMoviesViewSet(
     permission_classes = [IsAuthenticated]
     lookup_url_kwarg = "pk"
     lookup_field = "pk"
+    ordering = ["title", "-release_date"]
 
     def get_queryset(self):
         return get_spectator_from_request(self.request).favorite_movies.all()
@@ -202,6 +203,7 @@ class FavoriteAuthorsViewSet(
     viewsets.GenericViewSet,
 ):
     permission_classes = [IsAuthenticated]
+    ordering = ["last_name", "first_name"]
     lookup_url_kwarg = "pk"
     lookup_field = "pk"
 
