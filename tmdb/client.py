@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import date, datetime
-from typing import Generator, List, Optional, Tuple
+from typing import Generator, List, Optional, Tuple, Set
 
 import requests
 from django.conf import settings
@@ -65,7 +65,7 @@ class TMDBClient:
         if req.status_code != 200:
             self.stdout.write(
                 self.style.ERROR(
-                    f"[TMDB Client] An error occured during request: {req.reason}"
+                    f"[TMDB Client] An error occured during request: {req.reason}\n{req.url}"
                 )
             )
             return ({}, False)
@@ -141,6 +141,20 @@ class TMDBClient:
             fetch_datetime=timezone.now(),
         )
 
+    def get_authors(self, tmdb_ids: Set[int]) -> Generator[AuthorFromTMDB]:
+        for tmdb_id in tmdb_ids:
+            try:
+                tmdb_author = self.get_author(tmdb_id)
+            except Exception as e:
+                self.stdout.write(
+                    self.style.ERROR(
+                        f"[TMDBClient] An unexpected error occured while fetching author with {tmdb_id} ID: {e}"
+                    )
+                )
+
+            if tmdb_author:
+                yield tmdb_author
+
     def get_movie(
         self, tmdb_movie_id: int, db_id: Optional[int] = None
     ) -> Optional[MovieFromTMDB]:
@@ -182,6 +196,12 @@ class TMDBClient:
             fetch_datetime=timezone.now(),
             directors_ids=list(director_ids),
         )
+
+    def get_movies(self, tmdb_ids: Set[int]) -> Generator[MovieFromTMDB]:
+        for tmdb_id in tmdb_ids:
+            movie_maybe = self.get_movie(tmdb_id)
+            if movie_maybe:
+                yield movie_maybe
 
     def find_movies_by_titles(
         self, titles: List[Tuple[str, int]]

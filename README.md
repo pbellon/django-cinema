@@ -32,15 +32,25 @@ just bootstrap
 just up
 ```
 
-4. After that you'll need some initial data (movies, authors and maybe links between them). You can use the `seed` command to quickly do that. It will create some authors, movies and spectators data.
+4. You'll need a superuser to check the admin page
+```bash
+just manage createsuperuser
+```
+
+5. After that you'll need some initial data (movies, authors and maybe links between them). You can use the `seed` command to quickly do that. It will create some authors, movies and spectators data.
 
 ```bash
 just manage seed
 ```
 
-5. Run `populate_from_tmdb` command to start fetching data from TMDB. You can run it multiple times to fetch additionnal data.
+5. Run `tmdb` command to start fetching data from TMDB.
 ```bash
-just manage populate_from_tmdb
+# populate non-populated Movie & Author models
+just manage tmdb populate
+
+# expand already populated Movie & Author models, can be run multiple times
+# to fetch additionnal data
+just manage tmdb expand
 ```
 
 ## API endpoints
