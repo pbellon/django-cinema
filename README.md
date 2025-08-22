@@ -71,8 +71,29 @@ just manage tmdb expand
 
 
 ### Authentication
-- `POST /api/register` register yourself as a spectator
-- `POST /api/token/` create a JWT token to use the endpoints requiring authentication
+#### `POST /api/register` register yourself as a spectator
+Request body
+```json
+{
+  "username": "janedoe",
+  "password": "password",
+  "email": "janedoe@doe-corporation.com",
+  "first_name": "Jane",
+  "last_name": "Doe",
+  "biography": "Some biography"
+}
+```
+
+#### `POST /api/token/` create a JWT token to use the endpoints requiring authentication
+Request body
+```json
+{
+  "username": "janedoe",
+  "password": "password"
+}
+```
+
+
 - `POST /api/token/refresh/` refresh JWT token and obtain a new access token
 - `POST /api/token/invalidate/` invalidate a given JWT token and logout
 

@@ -9,16 +9,6 @@ from cinema.models import (
 )
 
 
-class AuthorListSerializer(serializers.ModelSerializer):
-    details = serializers.HyperlinkedIdentityField(
-        view_name="author-detail", lookup_field="pk"
-    )
-
-    class Meta:
-        model = Author
-        fields = ["id", "full_name", "details"]
-
-
 class MovieListSerializer(serializers.ModelSerializer):
     details = serializers.HyperlinkedIdentityField(
         view_name="movie-detail", lookup_field="pk"
@@ -27,6 +17,16 @@ class MovieListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Movie
         fields = ["id", "title", "details", "release_date"]
+
+
+class AuthorListSerializer(serializers.ModelSerializer):
+    details = serializers.HyperlinkedIdentityField(
+        view_name="author-detail", lookup_field="pk"
+    )
+
+    class Meta:
+        model = Author
+        fields = ["id", "full_name", "details"]
 
 
 class AuthorDetailsSerializer(serializers.ModelSerializer):

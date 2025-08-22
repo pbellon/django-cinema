@@ -55,7 +55,7 @@ api_router.register(
 )
 
 urlpatterns = [
-    path("auth/", include("rest_framework.urls", namespace="rest_framework")),
+    # path("auth/", include("rest_framework.urls", namespace="rest_framework")),
     # auth
     path("register/", RegisterSpectatorView.as_view(), name="register"),
     path("token/", TokenObtainPairView.as_view(), name="token_obtain"),

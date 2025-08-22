@@ -39,6 +39,7 @@ class MovieViewSet(
     mixins.RetrieveModelMixin,
     viewsets.GenericViewSet,
 ):
+    ordering = ["title", "-release_date"]
     queryset = Movie.objects.all()
 
     def get_queryset(self):
@@ -99,6 +100,7 @@ class AuthorViewSet(
     viewsets.GenericViewSet,
 ):
     queryset = Author.objects.all()
+    ordering = ["last_name", "first_name"]
 
     def get_queryset(self):
         qs = super().get_queryset()
