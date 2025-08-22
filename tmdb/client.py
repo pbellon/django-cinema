@@ -46,7 +46,7 @@ class TMDBClient:
     def __init__(self, stdout: OutputWrapper, style: Style):
         self.stdout = stdout
         self.style = style
-
+        # TODO: change with LimiterSession from https://requests-ratelimiter.readthedocs.io/en/stable/
         session = requests.Session()
         session.headers.update(
             {

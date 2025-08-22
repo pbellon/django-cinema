@@ -60,6 +60,7 @@ class MovieDetailsSerializer(serializers.ModelSerializer):
             "release_date",
             "status",
             "evaluation",
+            "imdb_id",
             "imdb_page",
             "authors",
         ]

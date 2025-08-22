@@ -77,7 +77,7 @@ bootstrap *ARGS:
 @check *ARGS:
     uvx ruff check {{ ARGS }}
 
-# Compile exports dependencies from pyproject.toml into requirements.txt
+# Compile and exports dependencies from pyproject.toml into requirements.txt
 @lock:
     uv export --format requirements-txt > requirements.txt
     just compose build
