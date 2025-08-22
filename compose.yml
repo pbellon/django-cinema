@@ -32,7 +32,6 @@ services:
       timeout: 3s
       retries: 5
 
-  # -------- DEV --------
   utility:
     <<: *common-settings
     profiles: ["dev"]
@@ -51,7 +50,7 @@ services:
     environment:
       <<: *common-env
       DJANGO_DEBUG: "true"
-    entrypoint: ["/src/compose-entrypoint.sh"]  # si le script existe
+    entrypoint: ["/src/compose-entrypoint.sh"] 
     command: ["python", "-m", "manage", "runserver", "0.0.0.0:8000"]
     ports: ["8000:8000"]
     tty: true
@@ -70,7 +69,6 @@ services:
     command: ["gunicorn","--bind","0.0.0.0:8000","config.wsgi:application","--workers","3","--threads","4","--timeout","60"]
     ports: ["8000:8000"]
     restart: unless-stopped
-# pas de volumes en prod
 
 volumes:
   postgres-data:

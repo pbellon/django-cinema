@@ -8,7 +8,7 @@
 > Bootstrapped with [django-startproject](https://github.com/jefftriplett/django-startproject)
 
 ## Prerequisites
-This project relies on [docker][docker], [uv][uv] and [just][uv] to properly work.
+This project relies on [docker][docker], [uv][uv] and [just][just].
 
 Here's the suggested installation process for `uv` and `just` if you don't have them already:
 
@@ -22,20 +22,19 @@ cargo install just
 npm install -g just
 ```
 
-Or you can check the linked documentations to see how to install them on your machine.
+Or you can check the linked documentation pages to see how to install them on your machine.
 
 
 ## Quick start
 
-1. Bootstrap the app, will create `.env` file for django configuration env variables
+1. Bootstrap the app; this will create an `.env` file to configure the application's environment variables
 ```bash
 just bootstrap
 ```
 
-2. Configure `.env` file, needs a valid TMDB token in `TMDB_API_TOKEN` to work properly and to
-   create a secured `DJANGO_SECRET_KEY` variable
+2. Configure the `.env` file: you need a valid TMDB token in `TMDB_API_TOKEN` and set a secure `DJANGO_SECRET_KEY` variable
 
-3. Start django
+3. Start Django
 ```bash
 just up --build
 ```
@@ -45,13 +44,13 @@ just up --build
 just manage createsuperuser
 ```
 
-5. After that you'll need some initial data (movies, authors and maybe links between them). You can use the `seed` command to quickly do that. It will create some authors, movies and spectators data.
+5. After that you'll need some initial data (movies, authors and maybe links between them). You can use the `seed` command to quickly do that. It will create authors, movies and spectators data.
 
 ```bash
 just manage seed
 ```
 
-5. Run `tmdb` command to start fetching data from TMDB.
+6. Run `tmdb` command to start fetching data from TMDB.
 ```bash
 # populate non-populated Movie & Author models (i.e: models created by the admin)
 just manage tmdb populate
@@ -61,14 +60,20 @@ just manage tmdb populate
 just manage tmdb expand
 ```
 
-6. Optionally you can run the app in "prod" mode by configuring the `PROFILE` environment variable. Possible values: `dev` (default), `prod`.
-   Be careful to remove `DJANGO_DEBUG=True` from your `.env`.
+7. Optionally you can run the app in a "prod" profile by configuring the `PROFILE` environment variable. Possible values: `dev` (default), `prod`.
+  - But be careful to remove `DJANGO_DEBUG=True` from your `.env` if it's set
+  - And to run `just manage migrate` after launching Django (`just up --build`) if this is the first time the database is created (i.e., if you never launched in the dev profile before)
+
+
+At this point you should have access to the admin & API URLs
+- http://localhost:8000/admin
+- http://localhost:8000/api
 
 ## API endpoints
-All endpoints marked with __(AUTH)__ requires to be authenticated. See 
-`/api/token` below for more details on how to authenticate.
+All endpoints marked with __(AUTH)__ require authentication. See `/api/token`
+below for more details on how to authenticate.
 
-### Movies endpoints
+### Movies
 
 #### `GET /api/movies/`
 List all movies. 
@@ -129,7 +134,7 @@ Retrieve a single movie
 ```
 
 #### __(AUTH)__ `GET /api/movies/by-year/<year>/` 
-List all movies of year set in URL
+List all movies released in the year set in the URL via their `release_date`.
 
 ##### Response
 ```json
@@ -156,7 +161,7 @@ Update a single movie. Available fields:
 - `title`: `String`, must not exceed 300 characters
 - `description`: `String`
 - `release_date`: `String` (must be a valid date, can be null)
-- `imdb_id`: `String` IMDB id of this movie
+- `imdb_id`: `String` IMDb id of this movie
 - `evaluation`: `Number`, integer between 0 and 5
   - 0 => Not Rated
   - 1 => Very Bad
@@ -216,7 +221,8 @@ Fields:
 }
 ```
 
-### Author
+### Authors
+
 #### `GET /api/authors/`
 
 List all authors
@@ -277,7 +283,7 @@ Update a single author
 
 Available fields:
 - `biography`: `String`
-- `imdb_id`: `String`
+- `imdb_id`: `String`, IMDb id of this author
 - `first_name`: `String`
 - `last_name`: `String`
 - `birth_day`: `String`, must be a valid date string, can be null
@@ -352,7 +358,7 @@ Remove an author from your favorites via its ID.
 
 #### __(AUTH)__  `GET /api/favorites/movies/`
 
-List your favorites movies
+List your favorite movies
 
 ##### Response
 
@@ -393,7 +399,7 @@ Remove a movie from your favorites
 Register yourself as a spectator. Required in order to access endpoints protected by authentication.
 Use `/api/token/` endpoints below to generate a token.
 
-Request body
+##### Request
 ```json
 {
   "username": "janedoe",
@@ -408,7 +414,7 @@ Request body
 #### `POST /api/token/`
 Create a JWT token to use the endpoints requiring authentication
 
-##### Request body
+##### Request
 ```json
 {
   "username": "janedoe",
@@ -424,12 +430,12 @@ Create a JWT token to use the endpoints requiring authentication
 }
 ```
 
-Once you have your `access` token, use it in __(AUTH)__ endpoints by setting a `Authorization: Bearer {access}` HTTP header.
+Once you have your `access` token, use it in __(AUTH)__ endpoints by setting an `Authorization: Bearer {access}` HTTP header.
 
 #### `POST /api/token/refresh/` 
 Refresh JWT token and obtain a new access token
 
-##### Request body
+##### Request
 ```json
 {
     "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc1NTk1NzY1MywiaWF0IjoxNzU1ODcxMjUzLCJqdGkiOiJjYWQ2ODExMzk2ZDY0NTM4OGE0OWE3NmZhMzE2ZjZjZiIsInVzZXJfaWQiOiI4MCJ9.c_IjuSA4X7CL11upNj742NEgMLlRwn5q1d4Go6OAxXw"
@@ -460,8 +466,12 @@ Those are points not handled I would have added with more time
 - Use `nginx` to:
   - serve collected static files
   - configure a reverse proxy to gunicorn
-- Use caching on some endpoints, especially public ones
-- Add tests on all endpoints and core functionnalities
+- Use caching (probably using Redis) on some endpoints, especially public ones
+- Add tests on all endpoints and core functionalities
+- Add GitHub Actions to check proper linting and run tests
+- Improve API discoverability with additional links and automatic OpenAPI
+  schema generation with `drf-spectacular`
+- Automate API endpoint documentation generation inside repository
 
 ## Usage
 
@@ -493,8 +503,12 @@ $ just test
 # Lint the project
 $ just lint
 
-# Re-build PIP requirements
+# Check lint errors
+$ just check
+
+# Rebuild PIP requirements
 $ just lock
+
 ```
 
 
@@ -503,15 +517,16 @@ $ just lock
 
 ```shell
 $ just --list
-
 Available recipes:
     bootstrap *ARGS           # Initialize project with dependencies and environment
     build *ARGS               # Build Docker containers with optional args
     check *ARGS               # Check lint errors with ruff
+    compose *ARGS             # Run docker compose with --profile depending on PROFILE environement variable
+    compose_dev *ARGS         # Run docker compose --profile dev {{ args }}
     console                   # Open interactive bash console in utility container
     down *ARGS                # Stop and remove containers, networks
     lint                      # Run ruff linter on all python code
-    lock                      # Compile and exports dependencies from pyproject.toml into requirements.txt
+    lock                      # Compile and export dependencies from pyproject.toml into requirements.txt
     logs *ARGS                # Show logs from containers
     manage *ARGS              # Run Django management commands
     pg_dump file='db.dump'    # Dump database to file

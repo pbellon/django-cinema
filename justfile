@@ -46,6 +46,7 @@ bootstrap *ARGS:
 @compose_dev *ARGS:
     docker compose --profile dev {{ ARGS }}
 
+# Run docker compose with --profile depending on PROFILE environement variable
 @compose *ARGS:
     docker compose --profile {{profile}} {{ ARGS }}
 
@@ -77,7 +78,7 @@ bootstrap *ARGS:
 @check *ARGS:
     uvx ruff check {{ ARGS }}
 
-# Compile and exports dependencies from pyproject.toml into requirements.txt
+# Compile and export dependencies from pyproject.toml into requirements.txt
 @lock:
     uv export --format requirements-txt > requirements.txt
     just compose build
