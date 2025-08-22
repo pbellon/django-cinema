@@ -459,10 +459,10 @@ Invalidate a given JWT token and effectively "logout"
 }
 ```
 
-
-
 ## Improvement points
 Those are points not handled I would have added with more time
+- Improve admin pages UX overall (add search fields notably)
+- Customize Author & Spectator admin forms to hide password
 - Use `nginx` to:
   - serve collected static files
   - configure a reverse proxy to gunicorn
