@@ -165,8 +165,6 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly",
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        # "rest_framework.authentication.BasicAuthentication",
-        # "rest_framework.authentication.SessionAuthentication",
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
     "DEFAULT_FILTER_BACKENDS": [
@@ -181,3 +179,14 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {"user": "2000/hour", "anon": "500/hour"},
     "PAGE_SIZE": 50,
 }
+
+# "prod" mode additionnal configuration & safety checks
+if not DEBUG:
+    REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"] = [
+        "rest_framework.renderers.JSONRenderer",
+    ]
+
+    CRSF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
+    CONN_MAX_AGE = 60  # one minute persistence for each DB connection
+    CONN_HEALTH_CHECKS = True
