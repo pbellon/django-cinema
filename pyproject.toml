@@ -35,7 +35,7 @@ omit = [
 DJANGO_SETTINGS_MODULE = "config.settings"
 addopts = "--cov --nomigrations --reuse-db"
 norecursedirs = ".git* frontend media static templates"
-python_files = "test_*.py"
+python_files = ["test_*.py", "tests.py"]
 
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
