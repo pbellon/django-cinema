@@ -1,4 +1,16 @@
 
+set dotenv-load := true
+
+profile := env_var_or_default("PROFILE", "dev")
+
+db_user := env_var_or_default('POSTGRES_USER', 'postgres')
+db_pass := env_var_or_default('POSTGRES_PASSWORD', 'postgres')
+db_name := env_var_or_default('POSTGRES_DB', 'cinema')
+db_url := env_var_or_default(
+  'DATABASE_URL',
+  'postgres://' + db_user + ':' + db_pass + '@db:5432' + '/' + db_name
+)
+
 # Show list of available commands
 @_default:
     just --list
@@ -30,20 +42,27 @@ bootstrap *ARGS:
         just build {{ ARGS }} --pull
     fi
 
+# Run docker compose --profile dev {{ args }}
+@compose_dev *ARGS:
+    docker compose --profile dev {{ ARGS }}
+
+@compose *ARGS:
+    docker compose --profile {{profile}} {{ ARGS }}
+
 # Build Docker containers with optional args
 @build *ARGS:
-    docker-compose build {{ ARGS }}
+    just compose build {{ ARGS }}
 
 # Open interactive bash console in utility container
 @console:
-    docker-compose run \
+    just compose_dev run \
         --no-deps \
         --rm \
         utility /bin/bash
 
 # Stop and remove containers, networks
 @down *ARGS:
-    docker-compose down {{ ARGS }}
+    just compose down {{ ARGS }}
 
 # Format justfile with unstable formatter
 [private]
@@ -61,15 +80,15 @@ bootstrap *ARGS:
 # Compile exports dependencies from pyproject.toml into requirements.txt
 @lock:
     uv export --format requirements-txt > requirements.txt
-    docker-compose build web
+    just compose build
 
 # Show logs from containers
 @logs *ARGS:
-    docker-compose logs {{ ARGS }}
+    just compose logs {{ ARGS }}
 
 # Run Django management commands
 @manage *ARGS:
-    docker-compose run \
+    just compose run \
         --no-deps \
         --rm \
         utility \
@@ -77,23 +96,23 @@ bootstrap *ARGS:
 
 # Dump database to file
 @pg_dump file='db.dump':
-    docker-compose run \
+    just compose run \
         --no-deps \
         --rm \
         db pg_dump \
-            --dbname "${DATABASE_URL:=postgres://postgres@db/postgres}" \
+            --dbname "{{db_url}}" \
             --file /src/{{ file }} \
             --format=c \
             --verbose
 
 # Restore database dump from file
 @pg_restore file='db.dump':
-    docker-compose run \
+    just compose run \
         --no-deps \
         --rm \
         db pg_restore \
             --clean \
-            --dbname "${DATABASE_URL:=postgres://postgres@db/postgres}" \
+            --dbname "{{db_url}}" \
             --if-exists \
             --no-owner \
             --verbose \
@@ -101,11 +120,11 @@ bootstrap *ARGS:
 
 # Restart containers
 @restart *ARGS:
-    docker-compose restart {{ ARGS }}
+    just compose restart {{ ARGS }}
 
 # Run command in utility container
 @run *ARGS:
-    docker-compose run \
+    just compose_dev run \
         --no-deps \
         --rm \
         utility {{ ARGS }}
@@ -124,12 +143,12 @@ bootstrap *ARGS:
 
 # Run pytest with arguments
 @test *ARGS:
-    docker-compose run \
+    just compose_dev run \
         --no-deps \
         --rm \
         utility python -m pytest {{ ARGS }}
 
 # Start containers
 @up *ARGS:
-    docker-compose up {{ ARGS }}
+    just compose up {{ ARGS }}
 

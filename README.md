@@ -29,7 +29,7 @@ just bootstrap
 
 3. Start django
 ```bash
-just up
+just up --build
 ```
 
 4. You'll need a superuser to check the admin page
@@ -52,6 +52,8 @@ just manage tmdb populate
 # to fetch additionnal data
 just manage tmdb expand
 ```
+
+6. Optionnaly you can run the app in "prod" mode by configuring the `PROFILE` environment variable. Possible values: `dev` (default), `prod`.
 
 ## API endpoints
 
@@ -100,7 +102,6 @@ Request body
 
 ## Improvement points
 Those are points not handled I would have added with more time
-- Don't rely on `manage.py runserver` and instead use `gunicorn`
 - Use `nginx` to:
   - serve collected staticfiles
   - configure a reverse proxy to gunicon

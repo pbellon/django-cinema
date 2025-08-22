@@ -1,48 +1,76 @@
+x-common-env: &common-env
+  DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+  DJANGO_DEBUG: ${DJANGO_DEBUG:-false}
+  ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1}
+  DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-cinema}
+  TMDB_API_TOKEN: ${TMDB_API_TOKEN}
+
 x-common-settings: &common-settings
   build:
     context: .
     dockerfile: ./Dockerfile
-    target: release
   depends_on:
     db:
       condition: service_healthy
-  environment:
-    - "ALLOWED_HOSTS=*"
-    - "DATABASE_URL=postgres://postgres@db/postgres"
-    - "DJANGO_DEBUG=true"
-    - "TMDB_API_TOKEN=$TMDB_API_TOKEN"
   restart: on-failure
-  volumes:
-    - .:/src:cache
+# Pas de working_dir ici: chaque stage l'a déjà
 
 services:
-
   db:
-    environment:
-      - "POSTGRES_HOST_AUTH_METHOD=trust"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
-      interval: 10s
-      timeout: 3s
-      retries: 3
     image: "pgautoupgrade/pgautoupgrade:latest"
     init: true
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-cinema}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     volumes:
-      - .:/src:cache
       - postgres-data:/var/lib/postgresql/data/
+      - ./backups:/backups
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
 
+  # -------- DEV --------
   utility:
     <<: *common-settings
+    profiles: ["dev"]
+    environment: *common-env
     tty: true
+    volumes:
+      - .:/src:cached
+
+  web-dev:
+    <<: *common-settings
+    profiles: ["dev"]
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      target: dev
+    environment:
+      <<: *common-env
+      DJANGO_DEBUG: "true"
+    entrypoint: ["/src/compose-entrypoint.sh"]  # si le script existe
+    command: ["python", "-m", "manage", "runserver", "0.0.0.0:8000"]
+    ports: ["8000:8000"]
+    tty: true
+    init: true
+    volumes:
+      - .:/src:cached
 
   web:
     <<: *common-settings
-    command: ["python", "-m", "manage", "runserver", "--skip-checks", "0.0.0.0:8000"]
-    entrypoint: ["/src/compose-entrypoint.sh"]
-    init: true
-    ports:
-      - "8000:8000"
-    tty: true
+    profiles: ["prod"]
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      target: release
+    environment: *common-env
+    command: ["gunicorn","--bind","0.0.0.0:8000","config.wsgi:application","--workers","3","--threads","4","--timeout","60"]
+    ports: ["8000:8000"]
+    restart: unless-stopped
+# pas de volumes en prod
 
 volumes:
   postgres-data:
