@@ -1,11 +1,13 @@
-from cinema.models import CreationSource
 from rest_framework.exceptions import ValidationError
+
+from cinema.models import CreationSource
 
 
 class CreationSourceFilterMixin:
     """
-    Adds ?created_source=TMDB or ?created_source=ADMIN,TMDB filtering.
-    Replace 'created_source' with your actual field name if different.
+    Adds support for `?creation_source` filtering. Valid values (case insensitive):
+    - admin
+    - tmdb
     """
 
     def filter_by_created_source(self, qs):

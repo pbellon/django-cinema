@@ -1,6 +1,6 @@
-from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
@@ -41,7 +41,7 @@ class Author(User):
 
     @property
     def imdb_page(self):
-        if len(self.imdb_id) > 0:
+        if self.imdb_id:
             return f"https://www.imdb.com/name/{self.imdb_id}/"
 
         return ""
@@ -130,7 +130,7 @@ class Movie(models.Model):
 
     @property
     def imdb_page(self):
-        if len(self.imdb_id) > 0:
+        if self.imdb_id:
             return f"https://www.imdb.com/title/{self.imdb_id}/"
 
         return ""

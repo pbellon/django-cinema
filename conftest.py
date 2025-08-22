@@ -4,7 +4,6 @@ import logging
 
 import pytest
 
-
 logging.disable(logging.CRITICAL)
 
 

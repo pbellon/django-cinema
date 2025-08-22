@@ -6,14 +6,14 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.db.models import Value
 from django.db.models.functions import Concat
+
 from cinema.models import (
+    Author,
     CreationSource,
     Movie,
     MovieEvaluation,
     MovieStatus,
-    Author,
 )
-
 from tmdb import client
 
 

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import date, datetime
-from typing import Generator, List, Optional, Tuple, Set
+from typing import Generator, List, Optional, Set, Tuple
 
 import requests
 from django.conf import settings
@@ -101,14 +101,14 @@ class TMDBClient:
         deathday = None
         birthday = None
 
-        if len(deathday_str) > 0:
+        if deathday_str:
             deathday = parse_date(deathday_str)
 
-        if len(birthday_str) > 0:
+        if birthday_str:
             birthday = parse_date(birthday_str)
 
         # Fail if no name is detected, will break further features
-        if len(name) == 0:
+        if not name:
             raise Exception("Missing `name` attribute in fetched author")
 
         # Poor's man first / last names parsing, not a big deal since we'll
@@ -180,7 +180,7 @@ class TMDBClient:
 
         release_date = None
 
-        if release_date_str and len(release_date_str) > 0:
+        if release_date_str:
             release_date = parse_date(release_date_str)
 
         return MovieFromTMDB(
@@ -216,7 +216,7 @@ class TMDBClient:
                 # skip this title because of issue with request
                 continue
 
-            if len(search_results["results"]) == 0:
+            if not search_results["results"]:
                 self.stdout(
                     self.style.ERROR(
                         f"[TDMB Client] No movie found on TMDB with {title} title"
@@ -245,7 +245,7 @@ class TMDBClient:
                 # skip this title because of issue with request
                 continue
 
-            if len(search_results["results"]) == 0:
+            if not search_results["results"]:
                 self.stdout(
                     self.style.ERROR(
                         f"[TDMB Client] No author found on TMDB with {name} name"

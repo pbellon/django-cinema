@@ -18,6 +18,7 @@ dependencies = [
     "whitenoise>=6.9.0",
 ]
 
+
 [tool.black]
 target-version = ["py313"]
 

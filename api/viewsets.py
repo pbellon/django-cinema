@@ -1,9 +1,9 @@
-from django.shortcuts import get_object_or_404, redirect
+from django.core.exceptions import PermissionDenied
+from django.shortcuts import get_object_or_404
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
 
 from api.filters import CreationSourceFilterMixin
 from api.serializers import (
@@ -16,13 +16,20 @@ from api.serializers import (
     SpectatorAuthorEvaluationSerializer,
     SpectatorMovieEvaluationSerializer,
 )
-from api.utils import get_spectator_from_request
 from cinema.models import (
     Author,
     Movie,
+    Spectator,
     SpectatorAuthorEvaluation,
     SpectatorMovieEvaluation,
 )
+
+
+def get_spectator_from_request(request):
+    try:
+        return request.user.spectator
+    except Spectator.DoesNotExist:
+        raise PermissionDenied("You must be a spectator to perform this query")
 
 
 class MovieViewSet(
@@ -48,21 +55,15 @@ class MovieViewSet(
         return MovieDetailsSerializer
 
     def get_permissions(self):
-        permissions = []
+        permissions = [IsAuthenticated]
 
         if self.action == "list":
             permissions = [AllowAny]
-        else:
-            permissions = [IsAuthenticated]
 
         return [permission() for permission in permissions]
 
     @action(detail=False, url_path=r"by-year/(?P<year>\d{4})")
-    def by_year(self, request, year=None):
-        # redirect to listing route if no year set
-        if year is None:
-            return redirect("movie-list")
-
+    def by_year(self, request, year):
         qs = self.get_queryset().filter(release_date__year=year)
         serializer = self.get_serializer(qs, many=True)
         return Response(serializer.data)
@@ -72,15 +73,15 @@ class MovieViewSet(
         movie = self.get_object()
         spectator = get_spectator_from_request(request)
 
-        ser = SpectatorMovieEvaluationSerializer(data=request.data)
-        ser.is_valid(raise_exception=True)
+        serializer = SpectatorMovieEvaluationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
         obj, created = SpectatorMovieEvaluation.objects.update_or_create(
             movie=movie,
             spectator=spectator,
             defaults={
-                "score": ser.validated_data["score"],
-                "comment": ser.validated_data.get("comment", ""),
+                "score": serializer.validated_data["score"],
+                "comment": serializer.validated_data.get("comment", ""),
             },
         )
         out = SpectatorMovieEvaluationSerializer(obj)
@@ -139,15 +140,15 @@ class AuthorViewSet(
         author = self.get_object()
         spectator = get_spectator_from_request(request)
 
-        ser = SpectatorAuthorEvaluationSerializer(data=request.data)
-        ser.is_valid(raise_exception=True)
+        serializer = SpectatorAuthorEvaluationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
         obj, created = SpectatorAuthorEvaluation.objects.update_or_create(
             author=author,
             spectator=spectator,
             defaults={
-                "score": ser.validated_data["score"],
-                "comment": ser.validated_data.get("comment", ""),
+                "score": serializer.validated_data["score"],
+                "comment": serializer.validated_data.get("comment", ""),
             },
         )
         out = SpectatorAuthorEvaluationSerializer(obj)
@@ -178,9 +179,9 @@ class FavoriteMoviesViewSet(
         return MovieListSerializer
 
     def create(self, request, *args, **kwargs):
-        ser = self.get_serializer(data=request.data)
-        ser.is_valid(raise_exception=True)
-        movie = ser.validated_data["movie"]
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        movie = serializer.validated_data["movie"]
         user = get_spectator_from_request(request)
         user.favorite_movies.add(movie)
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -199,7 +200,7 @@ class FavoriteAuthorsViewSet(
     viewsets.GenericViewSet,
 ):
     permission_classes = [IsAuthenticated]
-    lookup_url_kwarg = "pk"  # <author_id> in URL
+    lookup_url_kwarg = "pk"
     lookup_field = "pk"
 
     def get_queryset(self):

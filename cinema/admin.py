@@ -1,15 +1,14 @@
 from django.contrib import admin
-from django.contrib.sites.models import Site
 from django.contrib.auth.models import Group
+from django.contrib.sites.models import Site
 from django.db.models import CharField, Value
-from django.db.models.functions import Concat, Coalesce, Lower
+from django.db.models.functions import Coalesce, Concat, Lower
 from django.utils.html import format_html
 
-
 from cinema.models import (
-    Spectator,
     Author,
     Movie,
+    Spectator,
     SpectatorAuthorEvaluation,
     SpectatorMovieEvaluation,
 )
@@ -22,15 +21,12 @@ admin.site.unregister(Site)
 class FullNameColumnMixin:
     """
     Adds a sortable 'Full name' column for models with first_name/last_name.
-    - Renders 'First Last'
-    - Sorts by a DB annotation 'full_name_sort' (case-insensitive, last then first)
     """
 
     full_name_sort_field = "full_name_sort"
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        # Case-insensitive sort by last_name then first_name via a single annotation
         return qs.annotate(
             full_name_sort=Concat(
                 Lower(Coalesce("last_name", Value(""))),
@@ -44,7 +40,6 @@ class FullNameColumnMixin:
     def full_name_admin(self, obj):
         first = obj.first_name or ""
         last = obj.last_name or ""
-        # Display keeps original casing; sorting uses the lowercase annotation above
         return (f"{first} {last}").strip()
 
 
@@ -61,7 +56,7 @@ class SpectatorAdmin(FullNameColumnMixin, admin.ModelAdmin):
 @admin.display(description="IMDB page")
 def imdb_page_admin(obj):
     link = obj.imdb_page
-    if len(link) > 0:
+    if link:
         return format_html(f'<a href="{link}" target="_blank">{link}</a>')
     return "-"
 
