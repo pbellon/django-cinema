@@ -539,3 +539,8 @@ Available recipes:
     test *ARGS                # Run pytest with arguments
     up *ARGS                  # Start containers
 ```
+
+## License
+
+- Bootstrap from “django-startproject” — BSD-3-Clause (see `LICENSES/django-startproject`)
+- Original code — AGPL 3.0 or later (see `LICENSES/AGPL-3.0-or-later`)
